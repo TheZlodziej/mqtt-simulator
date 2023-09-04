@@ -1,29 +1,49 @@
 from confighandler import ConfigHandler
+from paho.mqtt.client import Client
 
 
 class MqttSimConfig:
-    def __init__(self, path):
+    def __init__(self, path: str):
         self.__config = ConfigHandler(path)
-        self.__init_default()
 
-    # reads config, if it's missing some crucial data, fills it in with default values
-    def __init_default(self):
-        if not self.__config.get("broker"):
-            self.put_broker("localhost")
-
-    def put_topic(self, topic, data_format):
+    def put_topic(self, topic: str, data_format: str) -> None:
         self.__config.put(f"topics.{topic}.data_format", data_format)
 
-    def put_broker(self, url):
-        self.__config.put("broker", url)
+    def get_topic_data(self, topic: str) -> dict | None:
+        self.__config.get(topic)
+
+    def put_broker(self, host: str, port: int) -> None:
+        self.__config.put("broker.host", host)
+        self.__config.put("broker.port", port)
+
+    def get_broker(self) -> (str, int):
+        broker_info = self.__config.get("broker")
+        return broker_info.get('host', 'localhost'), broker_info.get('port', 1883)
 
 
 class MqttSim:
     def __init__(self, config):
         self.__config = config
+        self.__client = Client()
+        self.__setup_client()
 
-    def add_topic(self, topic, data_format):
-        self.__config.put_topic(topic, data_format)
+    def __setup_client(self):
 
-    def set_broker(self, url):
-        self.__config.put_broker(url)
+        self.__client.on_message = lambda a, b, msg: print(f"msg: {msg}")
+        self.__client.on_connect = lambda a, b, c, d: print("connected")
+        self.__client.on_disconnect = lambda a, b, c: print("disconnected")
+        host, port = self.__config.get_broker()
+        self.__client.connect(host, port)
+
+    # resubscribes all topics
+    def update_topics(self) -> None:
+        self.__client.unsubscribe('#')
+
+    def update_client(self) -> None:
+        self.__client.disconnect()
+        self.__client.reinitialise()
+        self.__setup_client()
+
+    def loop(self) -> None:
+        self.__client.loop()
+        # self.__client.loop_forever()

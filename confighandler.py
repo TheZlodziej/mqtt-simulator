@@ -32,8 +32,8 @@ class ConfigHandler:
 
     # returns value from config
     # example
-    # config.get("a.b") with data={ a: { b: 1 } } should return 1
-    def get(self, what):
+    # config.get("a.b") with data = { a: { b: 1 } } should return 1
+    def get(self, what) -> str | int | float | dict | None:
         keys = what.split('.')
         data = self.__data
         for key in keys:

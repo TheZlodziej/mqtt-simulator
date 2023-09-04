@@ -1,7 +1,10 @@
 # config format
 ```json
 {
-    "broker": "localhost",
+    "broker": { 
+        "host": "localhost",
+        "port": 1883
+    },
     "topics": {
         "topic 1": {
             "data_format": "<%rand%>",

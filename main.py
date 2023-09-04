@@ -11,20 +11,31 @@ def main(args):
         return
 
     if args.set_broker:
-        url = args.set_broker
-        config.put_broker(url)
+        host, port = args.set_broker
+        config.put_broker(host, int(port))
         return
 
-    # app = MqttSim(config)
+    app = MqttSim(config)
+    while True:
+        app.loop()
 
 
 def create_parser() -> ArgumentParser:
     parser = ArgumentParser(prog='mqtt simulator',
                             description='simulate flow of data over mqtt')
-    parser.add_argument("-at", "--add-topic", metavar=("topic_name",
-                        "data_format"), type=str, nargs=2, help="Add topic to config")
-    parser.add_argument("-sb", "--set-broker", metavar=("url"),
-                        type=str, help="Set broker url")
+    parser.add_argument("-at",
+                        "--add-topic",
+                        metavar=("topic_name", "data_format"),
+                        type=str,
+                        nargs=2,
+                        help="Add topic to config")
+
+    parser.add_argument("-sb",
+                        "--set-broker",
+                        metavar=("host", "port"),
+                        type=str,
+                        nargs=2,
+                        help="Set broker hostname (& port)")
     return parser
 
 
