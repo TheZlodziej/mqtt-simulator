@@ -8,10 +8,12 @@ def main(args):
     if args.add_topic:
         topic, format = args.add_topic
         config.put_topic(topic, format)
+        return
 
     if args.set_broker:
         url = args.set_broker
         config.put_broker(url)
+        return
 
     # app = MqttSim(config)
 
