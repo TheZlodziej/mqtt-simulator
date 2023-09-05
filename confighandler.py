@@ -42,5 +42,13 @@ class ConfigHandler:
             data = data[key]
         return data
 
-
+    # removes value from config
+    def remove(self, what) -> None:
+        keys = what.split('.')
+        data = self.__data
+        for key in keys[:-1]:
+            if key not in data:
+                return None
+            data = data[key]
+        del data[keys[-1]]
 
