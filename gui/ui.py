@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QMainWindow, QListWidgetItem, QPushButton, QHBoxLayout, QLabel, QWidget
+from PySide6.QtWidgets import QMainWindow, QListWidgetItem, QPushButton, QHBoxLayout, QVBoxLayout, QLabel, QWidget
+from PySide6.QtCore import Qt
 from gui.generated.mainwindow import Ui_MainWindow
 from mqttsim import MqttSim
 from functools import partial
@@ -39,21 +40,21 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                 lbl = QLabel(topic)
                 layout.addWidget(lbl)
 
+                # widget
+                widget = QWidget()
+                widget.setLayout(layout)
+                self.topics_list.addWidget(widget)
+
                 # remove btn
                 def on_remove_btn_clicked(topic):
                     self.__sim.remove_topic(topic)
-                    self.topics_list.removeItem(layout)
-                    print('finish me -> on_remove_btn_clicked', topic_config)
+                    widget.deleteLater()
 
                 remove_btn = QPushButton("Remove")
+                remove_btn.setCursor(Qt.CursorShape.PointingHandCursor)
                 remove_btn.clicked.connect(partial(on_remove_btn_clicked, topic))
                 layout.addWidget(remove_btn)
                 
-                # widget
-                widget = QWidget(parent=self.topics_list_widget)
-                widget.setLayout(layout)
-                widget.resize(200, 200)
-
             topics = self.__config.get_topics()
             for topic, topic_config in topics.items():
                 add_topic_item(topic, topic_config)

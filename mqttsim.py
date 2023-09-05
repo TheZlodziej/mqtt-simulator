@@ -25,7 +25,7 @@ class MqttSimConfig:
         return topics if topics is not None else dict()
 
     def remove_topic(self, topic_name):
-        self.__config.remove(f"topic.{topic_name}")
+        self.__config.remove(f"topics.{topic_name}")
 
 
 class MqttSim:

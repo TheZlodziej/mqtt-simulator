@@ -43,6 +43,8 @@ class ConfigHandler:
         return data
 
     # removes value from config
+    # example 
+    # config.remove("a.b", 1) should result with { a: {} } when starting with { a: { b: 1 } } object
     def remove(self, what) -> None:
         keys = what.split('.')
         data = self.__data
@@ -51,4 +53,5 @@ class ConfigHandler:
                 return None
             data = data[key]
         del data[keys[-1]]
+        self.__save_to_file()
 

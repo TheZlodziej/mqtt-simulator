@@ -115,6 +115,11 @@ class Ui_MainWindow(object):
         self.topics_list_widget.setGeometry(QRect(0, 0, 318, 340))
         self.verticalLayout = QVBoxLayout(self.topics_list_widget)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.topics_list = QVBoxLayout()
+        self.topics_list.setObjectName(u"topics_list")
+
+        self.verticalLayout.addLayout(self.topics_list)
+
         self.topics_list_scroll_area.setWidget(self.topics_list_widget)
 
         self.topics_vlayout.addWidget(self.topics_list_scroll_area)
