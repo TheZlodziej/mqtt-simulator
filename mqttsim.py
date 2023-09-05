@@ -28,11 +28,11 @@ class MqttSimConfig:
         topics = self.__config.get("topics")
         return topics if topics is not None else dict()
 
-    def remove_topic(self, topic):
+    def remove_topic(self, topic: str) -> None:
         self.__config.remove(f"topics.{topic}")
 
 class MqttSim:
-    def __init__(self, config):
+    def __init__(self, config: MqttSimConfig):
         self.__config = config
         self.__client = Client()
         self.__setup_client()
@@ -70,7 +70,7 @@ class MqttSim:
         self.__client.unsubscribe(topic)
         self.__config.remove_topic(topic)
 
-    def add_topic(self, topic, topic_config):
+    def add_topic(self, topic: str, topic_config: dict) -> None:
         self.__config.put_topic(topic, topic_config)
 
     def get_config(self) -> MqttSimConfig:

@@ -67,7 +67,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         self.topics_list.addWidget(widget)
 
         # remove btn
-        def on_remove_btn_clicked(topic):
+        def on_remove_btn_clicked(topic: str) -> None:
             self.__sim.remove_topic(topic)
             widget.deleteLater()
 
@@ -76,7 +76,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         remove_btn.clicked.connect(partial(on_remove_btn_clicked, topic))
         layout.addWidget(remove_btn)
 
-    def __set_values_from_config(self):
+    def __set_values_from_config(self) -> None:
         def set_values_from_config_broker() -> None:
             hostname, port = self.__config.get_broker()
             self.broker_hostname.setText(hostname)
