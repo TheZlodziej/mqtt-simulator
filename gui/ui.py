@@ -4,7 +4,7 @@ from gui.generated.mainwindow import Ui_MainWindow
 from gui.generated.addtopicdialog import Ui_Dialog
 from mqttsim import MqttSim
 from functools import partial
-
+from logger import QListWidgetLogHandler
 
 class MqttSimAddTopicWindow(Ui_Dialog, QDialog):
     def __init__(self):
@@ -13,14 +13,18 @@ class MqttSimAddTopicWindow(Ui_Dialog, QDialog):
 
 
 class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
-    def __init__(self, sim: MqttSim):
+    def __init__(self, sim: MqttSim, logger):
         super(MqttSimMainWindow, self).__init__()
         self.setupUi(self)
         self.__sim = sim
         self.__config = sim.get_config()
         self.__setup_connects()
         self.__set_values_from_config()
-        self.logger = None
+        self.__logger = logger
+        self.__setup_logger()
+
+    def __setup_logger(self) -> None:
+        self.__logger.addHandler(QListWidgetLogHandler(self.logs_list))
 
     def __setup_connects(self) -> None:
         def on_broker_connect_btn_clicked() -> None:
