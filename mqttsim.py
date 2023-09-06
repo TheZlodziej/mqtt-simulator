@@ -31,11 +31,13 @@ class MqttSimConfig:
     def remove_topic(self, topic: str) -> None:
         self.__config.remove(f"topics.{topic}")
 
+
 class MqttSim:
     def __init__(self, config: MqttSimConfig):
         self.__config = config
         self.__client = Client()
         self.__setup_client()
+        self.logger = None
 
     def __setup_client(self) -> None:
         self.__client.on_message = lambda a, b, msg: print(f"msg: {msg}")
@@ -69,9 +71,11 @@ class MqttSim:
     def remove_topic(self, topic: str) -> None:
         self.__client.unsubscribe(topic)
         self.__config.remove_topic(topic)
+        self.logger.info(f"Removed topic: {topic}")
 
     def add_topic(self, topic: str, topic_config: dict) -> None:
         self.__config.put_topic(topic, topic_config)
+        self.logger.info(f"Added topic: {topic}")
 
     def get_config(self) -> MqttSimConfig:
         return self.__config

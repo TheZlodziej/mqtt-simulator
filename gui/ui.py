@@ -20,6 +20,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         self.__config = sim.get_config()
         self.__setup_connects()
         self.__set_values_from_config()
+        self.logger = None
 
     def __setup_connects(self) -> None:
         def on_broker_connect_btn_clicked() -> None:
