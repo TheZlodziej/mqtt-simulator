@@ -13,10 +13,10 @@ class MqttSimAddTopicWindow(Ui_Dialog, QDialog):
 
 
 class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
-    def __init__(self, sim: MqttSim, logger):
+    def __init__(self, sim: MqttSim):
         super(MqttSimMainWindow, self).__init__()
         self.setupUi(self)
-        self.__logger = logger
+        self.__logger = sim.get_logger()
         self.__setup_logger()
         self.__sim = sim
         self.__config = sim.get_config()

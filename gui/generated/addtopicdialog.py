@@ -109,8 +109,8 @@ class Ui_Dialog(object):
         self.name_line_edit.setToolTip("")
 #endif // QT_CONFIG(tooltip)
 #if QT_CONFIG(tooltip)
-        self.format_line_edit.setToolTip(QCoreApplication.translate("Dialog", u"Data format - <%randd%> will be replaced with random double value, <%randi%> will be replaced with random integer", None))
+        self.format_line_edit.setToolTip(QCoreApplication.translate("Dialog", u"Data format - <%randf%> will be replaced with random float value from [0; 1) range, <%randi%> will be replaced with random signed 32 bit integer, <%randu%> will be replaced with random unsigned 32 bit integer", None))
 #endif // QT_CONFIG(tooltip)
-        self.format_line_edit.setText(QCoreApplication.translate("Dialog", u"{ data: <%randi%> }", None))
+        self.format_line_edit.setText(QCoreApplication.translate("Dialog", u"{ 'data': <%randi%> }", None))
     # retranslateUi
 
