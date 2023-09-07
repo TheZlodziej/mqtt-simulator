@@ -21,7 +21,7 @@ for example
 ```
 python main.py -sb mybroker.com 4444
 ```
-
+---
 - set up topics with following:
 ```
 python main.py -at <topic name: string> <data format: string> <interval in seconds: float>
@@ -34,8 +34,10 @@ for example
 ```
 python main.py -at "my/topic" '{"data": {"x": <%randi%> }}' 1.5
 ```
-to modify topic, simply override it with new values.
 
+To modify topic, simply override it with new values.
+
+---
 <b>Data format</b> is a string containg formula for a message. Assume we want to revieve messages in following format
 ```json
 {
@@ -76,9 +78,13 @@ You can always create ```config.json``` file yourself if you think writing it wi
         "port": 1883
     },
     "topics": {
-        "topic 1": {
-            "data_format": "<%rand%>",
+        "topic1": {
+            "data_format": "<%randi%>",
             "interval": 1
+        },
+        "test/topic2": {
+            "data_format": "{ 'x': '<%randu%>' }",
+            "interval": 1.5
         }
     }
 }
