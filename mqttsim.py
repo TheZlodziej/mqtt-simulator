@@ -27,12 +27,16 @@ class MqttSimConfig:
     def get_broker(self) -> (str, int):
         broker_info = self.__config.get("broker")
         if broker_info is None:
-            broker_info = {"host": "localhost", "port": 1883}
+            self.__config.put("broker", {"host": "localhost", "port": 1883})
+            return self.get_broker()
         return broker_info.get("host", "localhost"), broker_info.get("port", 1883)
 
     def get_topics(self) -> dict:
         topics = self.__config.get("topics")
-        return topics if topics is not None else dict()
+        if topics is None:
+            self.__config.put("topics", {})
+            return self.get_topics()
+        return topics
 
     def remove_topic(self, topic: str) -> None:
         self.__config.remove(f"topics.{topic}")
