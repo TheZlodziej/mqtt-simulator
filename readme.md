@@ -49,6 +49,7 @@ To achieve this, we can use placeholders for int32, uint32 and float in out data
 - ```<%randi%>``` for random int32
 - ```<%randu%>``` for random uint32
 - ```<%randf%>``` for random float in [0; 1) range
+  
 Our <b>Data format</b> would then be
 ```json
 { "data": { "x": "<%randi%>", "y": "<%randf%>" } }
