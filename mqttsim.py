@@ -26,7 +26,9 @@ class MqttSimConfig:
 
     def get_broker(self) -> (str, int):
         broker_info = self.__config.get("broker")
-        return broker_info.get("host", "localhost"), broker_info.get('port', 1883)
+        if broker_info is None:
+            broker_info = {"host": "localhost", "port": 1883}
+        return broker_info.get("host", "localhost"), broker_info.get("port", 1883)
 
     def get_topics(self) -> dict:
         topics = self.__config.get("topics")
@@ -49,7 +51,11 @@ class MqttSim:
 
     def __publishing_thread_fn(self) -> None:
         def make_data(data_format) -> str:
-            return data_format.replace(r"<%randi%>", str(randint(-2**31, 2**31 - 1))).replace(r"<%randf%>", str(random())).replace(r"<%randu%>", str(randint(0, 2**32-1)))
+            return (
+                data_format.replace(r"<%randi%>", str(randint(-(2**31), 2**31 - 1)))
+                .replace(r"<%randf%>", str(random()))
+                .replace(r"<%randu%>", str(randint(0, 2**32 - 1)))
+            )
 
         def time_diff_in_seconds(time1, time2) -> int:
             diff_dt = time1 - time2
@@ -66,10 +72,9 @@ class MqttSim:
                 if topic not in last_sent:
                     last_sent[topic] = now
                     continue
-                if time_diff_in_seconds(now, last_sent[topic]) > config['interval']:
+                if time_diff_in_seconds(now, last_sent[topic]) > config["interval"]:
                     self.__logger.info(f"Publishing data on {topic}")
-                    self.__client.publish(
-                        topic, make_data(config['data_format']))
+                    self.__client.publish(topic, make_data(config["data_format"]))
                     last_sent[topic] = now
             sleep(0.01)
 
@@ -81,8 +86,7 @@ class MqttSim:
             if rc == CONNACK_ACCEPTED:
                 self.__logger.info("Connected to broker.")
             else:
-                self.__logger.error(
-                    f"Error when connecting to broker (rc={rc}).")
+                self.__logger.error(f"Error when connecting to broker (rc={rc}).")
 
         def on_disconnect(client, userdata, rc):
             if rc == 0:
@@ -120,7 +124,8 @@ class MqttSim:
             return False
         except Exception:
             self.__logger.error(
-                f"Unknown error occured when trying to connect to broker.")
+                f"Unknown error occured when trying to connect to broker."
+            )
             return False
         return True
 
