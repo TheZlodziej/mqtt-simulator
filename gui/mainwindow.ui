@@ -172,12 +172,26 @@
                <x>0</x>
                <y>0</y>
                <width>318</width>
-               <height>340</height>
+               <height>337</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
               <item>
-               <layout class="QVBoxLayout" name="topics_list"/>
+               <layout class="QVBoxLayout" name="topics_list" stretch="0">
+                <item>
+                 <spacer name="topics_list_spacer">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -211,16 +225,27 @@
             <pointsize>10</pointsize>
            </font>
           </property>
-          <item>
-           <property name="text">
-            <string>[21:37:34] Test log.</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>[16:20:59] Test log2.</string>
-           </property>
-          </item>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QAbstractScrollArea::AdjustIgnored</enum>
+          </property>
+          <property name="textElideMode">
+           <enum>Qt::ElideNone</enum>
+          </property>
+          <property name="isWrapping" stdset="0">
+           <bool>false</bool>
+          </property>
+          <property name="uniformItemSizes">
+           <bool>false</bool>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+          <property name="sortingEnabled">
+           <bool>false</bool>
+          </property>
          </widget>
         </item>
         <item alignment="Qt::AlignRight">

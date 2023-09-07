@@ -15,10 +15,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
-    QLayout, QLineEdit, QListWidget, QListWidgetItem,
-    QMainWindow, QPushButton, QScrollArea, QSizePolicy,
-    QSpinBox, QTabWidget, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QFrame, QHBoxLayout,
+    QLabel, QLayout, QLineEdit, QListWidget,
+    QListWidgetItem, QMainWindow, QPushButton, QScrollArea,
+    QSizePolicy, QSpacerItem, QSpinBox, QTabWidget,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -112,11 +113,15 @@ class Ui_MainWindow(object):
         self.topics_list_scroll_area.setWidgetResizable(True)
         self.topics_list_widget = QWidget()
         self.topics_list_widget.setObjectName(u"topics_list_widget")
-        self.topics_list_widget.setGeometry(QRect(0, 0, 318, 340))
+        self.topics_list_widget.setGeometry(QRect(0, 0, 318, 337))
         self.verticalLayout = QVBoxLayout(self.topics_list_widget)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.topics_list = QVBoxLayout()
         self.topics_list.setObjectName(u"topics_list")
+        self.topics_list_spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.topics_list.addItem(self.topics_list_spacer)
+
 
         self.verticalLayout.addLayout(self.topics_list)
 
@@ -145,13 +150,18 @@ class Ui_MainWindow(object):
         self.logs_vlayout.addWidget(self.logs_lbl)
 
         self.logs_list = QListWidget(self.centralwidget)
-        QListWidgetItem(self.logs_list)
-        QListWidgetItem(self.logs_list)
         self.logs_list.setObjectName(u"logs_list")
         font1 = QFont()
         font1.setFamilies([u"Consolas"])
         font1.setPointSize(10)
         self.logs_list.setFont(font1)
+        self.logs_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.logs_list.setSizeAdjustPolicy(QAbstractScrollArea.AdjustIgnored)
+        self.logs_list.setTextElideMode(Qt.ElideNone)
+        self.logs_list.setProperty("isWrapping", False)
+        self.logs_list.setUniformItemSizes(False)
+        self.logs_list.setWordWrap(True)
+        self.logs_list.setSortingEnabled(False)
 
         self.logs_vlayout.addWidget(self.logs_list)
 
@@ -197,15 +207,6 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(tooltip)
         self.add_topic_btn.setText(QCoreApplication.translate("MainWindow", u"Add", None))
         self.logs_lbl.setText(QCoreApplication.translate("MainWindow", u"Logs", None))
-
-        __sortingEnabled = self.logs_list.isSortingEnabled()
-        self.logs_list.setSortingEnabled(False)
-        ___qlistwidgetitem = self.logs_list.item(0)
-        ___qlistwidgetitem.setText(QCoreApplication.translate("MainWindow", u"[21:37:34] Test log.", None));
-        ___qlistwidgetitem1 = self.logs_list.item(1)
-        ___qlistwidgetitem1.setText(QCoreApplication.translate("MainWindow", u"[16:20:59] Test log2.", None));
-        self.logs_list.setSortingEnabled(__sortingEnabled)
-
 #if QT_CONFIG(tooltip)
         self.clear_logs_btn.setToolTip(QCoreApplication.translate("MainWindow", u"Clear logs", None))
 #endif // QT_CONFIG(tooltip)
