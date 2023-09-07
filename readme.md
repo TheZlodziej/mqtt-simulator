@@ -40,8 +40,8 @@ to modify topic, simply override it with new values.
 ```json
 {
     "data": {
-        "x": <some integer>,
-        "y": <some floating>,
+        "x": <some int>,
+        "y": <some float>,
     }
 }
 ```
