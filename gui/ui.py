@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QMainWindow, QListWidgetItem, QPushButton, QHBoxLayout, QDialog, QLabel, QWidget, QMessageBox
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QCoreApplication
 from gui.generated.mainwindow import Ui_MainWindow
 from gui.generated.addtopicdialog import Ui_Dialog
 from mqttsim import MqttSim
@@ -16,28 +16,34 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
     def __init__(self, sim: MqttSim, logger):
         super(MqttSimMainWindow, self).__init__()
         self.setupUi(self)
+        self.__logger = logger
+        self.__setup_logger()
         self.__sim = sim
         self.__config = sim.get_config()
         self.__setup_connects()
         self.__set_values_from_config()
-        self.__logger = logger
-        self.__setup_logger()
 
     def __setup_logger(self) -> None:
         self.__logger.addHandler(QListWidgetLogHandler(self.logs_list))
 
     def __setup_connects(self) -> None:
         def on_broker_connect_btn_clicked() -> None:
-            self.__sim.set_broker(
-                self.broker_hostname.text(), self.broker_port.value())
+            if self.__sim.is_connected_to_broker():
+                self.__sim.disconnect_from_broker()
+                self.broker_connect_btn.setText(QCoreApplication.translate("MainWindow", u"Connect", None))
+                self.broker_connect_btn.setToolTip(QCoreApplication.translate("MainWindow", u"Connect to broker", None))
+            else:
+                if self.__sim.connect_to_broker():
+                    self.broker_connect_btn.setText(QCoreApplication.translate("MainWindow", u"Disconnect", None))
+                    self.broker_connect_btn.setToolTip(QCoreApplication.translate("MainWindow", u"Disconnect from broker", None))
 
         def on_clear_logs_btn_clicked() -> None:
             self.logs_list.clear()
+            self.__logger.info("Cleared logs.")
 
         def on_add_topic_btn_clicked() -> None:
             def validate_input(topic_name, topic_config):
                 return len(topic_name) > 0 and topic_name not in self.__config.get_topics().keys()
-
             add_topic_window = MqttSimAddTopicWindow()
             add_topic_window.exec()
             if add_topic_window.accepted:
@@ -52,9 +58,14 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                 else:
                     QMessageBox().critical(self, "Error!", "Invalid topic input.")
 
+        def on_broker_info_changed() -> None:
+            self.__sim.set_broker(self.broker_hostname.text(), self.broker_port.value())
+
         self.broker_connect_btn.clicked.connect(on_broker_connect_btn_clicked)
         self.clear_logs_btn.clicked.connect(on_clear_logs_btn_clicked)
         self.add_topic_btn.clicked.connect(on_add_topic_btn_clicked)
+        self.broker_hostname.textChanged.connect(on_broker_info_changed)
+        self.broker_port.valueChanged.connect(on_broker_info_changed)
 
     def __add_topic_to_item_list(self, topic: str, topic_config: dict) -> QListWidgetItem:
         # TODO popup with edit values
@@ -69,7 +80,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         # widget
         widget = QWidget()
         widget.setLayout(layout)
-        self.topics_list.addWidget(widget)
+        self.topics_list.insertWidget(0, widget)
 
         # remove btn
         def on_remove_btn_clicked(topic: str) -> None:

@@ -1,6 +1,5 @@
 from confighandler import ConfigHandler
-from paho.mqtt.client import Client
-
+from paho.mqtt.client import Client, CONNACK_ACCEPTED
 
 class MqttSimConfig:
     def __init__(self, path: str):
@@ -34,48 +33,67 @@ class MqttSimConfig:
 
 class MqttSim:
     def __init__(self, config: MqttSimConfig, logger):
-        self.__config = config
-        self.__client = Client()
-        self.__setup_client()
         self.__logger = logger
+        self.__config = config
+        self.__setup_client()
 
     def __setup_client(self) -> None:
-        self.__client.on_message = lambda a, b, msg: print(f"msg: {msg}")
-        self.__client.on_connect = lambda a, b, c, d: print("connected")
-        self.__client.on_disconnect = lambda a, b, c: print("disconnected")
+        def on_message(client, userdata, message):
+            self.__logger.info(f"Received message from broker: '{message}'.")
+
+        def on_connect(client, userdata, flags, rc):
+            if rc == CONNACK_ACCEPTED:
+                self.__logger.info("Connected to broker.")
+            else:
+                self.__logger.error(f"Error when connecting to broker (rc={rc}).")
+
+        def on_disconnect(client, userdata, rc):
+            if rc == 0:
+                self.__logger.info(f"Disconnected from broker.")
+            else:
+                self.__logger.error("Unexpected disconnection from broker.")
+
+        self.__client = Client()
+        self.__client.on_message = on_message
+        self.__client.on_connect = on_connect
+        self.__client.on_disconnect = on_disconnect
+
+    def is_connected_to_broker(self) -> bool:
+        return self.__client.is_connected()
+
+    def connect_to_broker(self) -> bool:
         host, port = self.__config.get_broker()
-        self.__client.connect(host, port)
-
-    # resubscribes all topics
-    # def update_topics(self) -> None:
-    #     self.__client.unsubscribe('#')
-
-    def __reinitialize_client(self) -> None:
+        self.__logger.info(f"Trying to connect to broker {host}:{port}...")
+        try:
+            self.__client.connect(host, port)
+            self.__client.loop_start()
+        except ConnectionError:
+            self.__logger.error(f"Coulnd't connect to broker {host}:{port}.")
+            return False
+        except Exception:
+            self.__logger.error(f"Unknown error occured when trying to connect to broker.")
+            return False
+        return True
+    
+    def disconnect_from_broker(self) -> None:
         self.__client.disconnect()
-        self.__client.reinitialise()
-        self.__setup_client()
-
-    # def loop(self) -> None:
-    #     self.__client.loop()
-    #     # self.__client.loop_forever()
+        self.__client.loop_stop()
 
     def set_broker(self, host: str, port: int) -> None:
         curr_host, curr_port = self.__config.get_broker()
-
         if host == curr_host and port == curr_port:
             return None
-
         self.__config.put_broker(host, port)
-        self.__reinitialize_client()
+        self.__logger.info(f"Changed broker to {host}:{port}.")
 
     def remove_topic(self, topic: str) -> None:
         self.__client.unsubscribe(topic)
         self.__config.remove_topic(topic)
-        self.__logger.info(f"Removed topic: {topic}")
+        self.__logger.info(f"Removed topic: {topic}.")
 
     def add_topic(self, topic: str, topic_config: dict) -> None:
         self.__config.put_topic(topic, topic_config)
-        self.__logger.info(f"Added topic: {topic}")
+        self.__logger.info(f"Added topic: {topic}.")
 
     def get_config(self) -> MqttSimConfig:
         return self.__config
