@@ -15,6 +15,6 @@ class QListWidgetLogHandler(Handler):
             log_message = QCoreApplication.translate(
                 "MainWindow", f"[{current_time}] {record.getMessage()}", None)
             log_item = QListWidgetItem(log_message)
-            self.__logs_list.addItem(log_item)
+            self.__logs_list.insertItem(0, log_item)
         except Exception:
             self.handleError(record)
