@@ -33,6 +33,7 @@ class MqttSimEditTopicWindow(Ui_EditTopicDialog, QDialog):
         self.name_line_edit.setText(topic_name)
         self.format_line_edit.setText(topic_data.get("data_format"))
         self.interval_spin_box.setValue(topic_data.get("interval"))
+        self.manual_check_box.setChecked(topic_data.get("manual"))
 
 
 class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
@@ -87,6 +88,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                 topic_config = {
                     "data_format": add_topic_window.format_line_edit.text(),
                     "interval": add_topic_window.interval_spin_box.value(),
+                    "manual": add_topic_window.manual_check_box.isChecked(),
                 }
                 if validate_input(topic_name, topic_config):
                     self.__sim.add_topic(topic_name, topic_config)
@@ -120,6 +122,12 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         widget.setLayout(layout)
         self.topics_list.insertWidget(0, widget)
 
+        # send now btn
+        send_now_btn = QPushButton("Send now")
+        send_now_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        send_now_btn.clicked.connect(partial(self.__sim.send_single_message, topic))
+        layout.addWidget(send_now_btn)
+
         # edit btn
         def on_edit_btn_clicked(topic: str) -> None:
             topic_data = self.__config.get_topic_data(topic)
@@ -129,6 +137,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                 edited_topic_data = {
                     "data_format": edit_topic_window.format_line_edit.text(),
                     "interval": edit_topic_window.interval_spin_box.value(),
+                    "manual": edit_topic_window.manual_check_box.isChecked(),
                 }
                 if edited_topic_data != topic_data:
                     self.__sim.edit(topic, edited_topic_data)

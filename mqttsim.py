@@ -10,7 +10,9 @@ class MqttSimConfig:
     def __init__(self, path: str):
         self.__config = ConfigHandler(path)
 
-    def put_topic(self, topic: str, data_format: str, interval: float = 1.5) -> None:
+    def put_topic(
+        self, topic: str, data_format: str, interval: float = 1.5, manual: bool = False
+    ) -> None:
         self.__config.put(f"topics.{topic}.data_format", data_format)
         self.__config.put(f"topics.{topic}.interval", interval)
 
@@ -54,13 +56,6 @@ class MqttSim:
         self.__publishing_thread = Thread(target=self.__publishing_thread_fn)
 
     def __publishing_thread_fn(self) -> None:
-        def make_data(data_format) -> str:
-            return (
-                data_format.replace(r"<%randi%>", str(randint(-(2**31), 2**31 - 1)))
-                .replace(r"<%randf%>", str(random()))
-                .replace(r"<%randu%>", str(randint(0, 2**32 - 1)))
-            )
-
         def time_diff_in_seconds(time1, time2) -> int:
             diff_dt = time1 - time2
             return diff_dt.total_seconds()
@@ -73,26 +68,27 @@ class MqttSim:
                 continue
             now = datetime.now()
             for topic, config in topics.items():
+                if config.get("manual"):
+                    continue
                 if topic not in last_sent:
                     last_sent[topic] = now
                     continue
-                if time_diff_in_seconds(now, last_sent[topic]) > config["interval"]:
-                    self.__logger.info(f"Publishing data on {topic}")
-                    self.__client.publish(topic, make_data(config["data_format"]))
+                if time_diff_in_seconds(now, last_sent[topic]) > config.get("interval"):
+                    self.send_single_message(topic)
                     last_sent[topic] = now
             sleep(0.01)
 
     def __setup_client(self) -> None:
-        def on_message(client, userdata, message):
+        def on_message(client, userdata, message) -> None:
             self.__logger.info(f"Received message from broker: '{message}'.")
 
-        def on_connect(client, userdata, flags, rc):
+        def on_connect(client, userdata, flags, rc) -> None:
             if rc == CONNACK_ACCEPTED:
                 self.__logger.info("Connected to broker.")
             else:
                 self.__logger.error(f"Error when connecting to broker (rc={rc}).")
 
-        def on_disconnect(client, userdata, rc):
+        def on_disconnect(client, userdata, rc) -> None:
             if rc == 0:
                 self.__logger.info(f"Disconnected from broker.")
             else:
@@ -163,3 +159,18 @@ class MqttSim:
 
     def edit(self, topic_name, new_data) -> None:
         self.__config.put_topic(topic_name, new_data)
+
+    def send_single_message(self, topic_name) -> None:
+        if not self.is_connected_to_broker():
+            return
+
+        def make_data(data_format) -> str:
+            return (
+                data_format.replace(r"<%randi%>", str(randint(-(2**31), 2**31 - 1)))
+                .replace(r"<%randf%>", str(random()))
+                .replace(r"<%randu%>", str(randint(0, 2**32 - 1)))
+            )
+
+        topic_data = self.__config.get_topic_data(topic_name)
+        self.__logger.info(f"Publishing data on {topic_name}...")
+        self.__client.publish(topic_name, make_data(topic_data.get("data_format")))
