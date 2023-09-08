@@ -18,7 +18,7 @@ class MqttSimConfig:
         self.__config.put(f"topics.{topic}", topic_config)
 
     def get_topic_data(self, topic: str) -> dict | None:
-        self.__config.get(topic)
+        return self.__config.get(f"topics.{topic}")
 
     def put_broker(self, host: str, port: int) -> None:
         self.__config.put("broker.host", host)
