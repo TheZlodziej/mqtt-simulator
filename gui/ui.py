@@ -1,10 +1,20 @@
-from PySide6.QtWidgets import QMainWindow, QListWidgetItem, QPushButton, QHBoxLayout, QDialog, QLabel, QWidget, QMessageBox
+from PySide6.QtWidgets import (
+    QMainWindow,
+    QListWidgetItem,
+    QPushButton,
+    QHBoxLayout,
+    QDialog,
+    QLabel,
+    QWidget,
+    QMessageBox,
+)
 from PySide6.QtCore import Qt, QCoreApplication
 from gui.generated.mainwindow import Ui_MainWindow
 from gui.generated.addtopicdialog import Ui_Dialog
 from mqttsim import MqttSim
 from functools import partial
 from logger import QListWidgetLogHandler
+
 
 class MqttSimAddTopicWindow(Ui_Dialog, QDialog):
     def __init__(self):
@@ -30,12 +40,22 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         def on_broker_connect_btn_clicked() -> None:
             if self.__sim.is_connected_to_broker():
                 self.__sim.disconnect_from_broker()
-                self.broker_connect_btn.setText(QCoreApplication.translate("MainWindow", u"Connect", None))
-                self.broker_connect_btn.setToolTip(QCoreApplication.translate("MainWindow", u"Connect to broker", None))
+                self.broker_connect_btn.setText(
+                    QCoreApplication.translate("MainWindow", "Connect", None)
+                )
+                self.broker_connect_btn.setToolTip(
+                    QCoreApplication.translate("MainWindow", "Connect to broker", None)
+                )
             else:
                 if self.__sim.connect_to_broker():
-                    self.broker_connect_btn.setText(QCoreApplication.translate("MainWindow", u"Disconnect", None))
-                    self.broker_connect_btn.setToolTip(QCoreApplication.translate("MainWindow", u"Disconnect from broker", None))
+                    self.broker_connect_btn.setText(
+                        QCoreApplication.translate("MainWindow", "Disconnect", None)
+                    )
+                    self.broker_connect_btn.setToolTip(
+                        QCoreApplication.translate(
+                            "MainWindow", "Disconnect from broker", None
+                        )
+                    )
 
         def on_clear_logs_btn_clicked() -> None:
             self.logs_list.clear()
@@ -43,14 +63,17 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
 
         def on_add_topic_btn_clicked() -> None:
             def validate_input(topic_name, topic_config):
-                return len(topic_name) > 0 and topic_name not in self.__config.get_topics().keys()
+                return (
+                    len(topic_name) > 0
+                    and topic_name not in self.__config.get_topics().keys()
+                )
+
             add_topic_window = MqttSimAddTopicWindow()
-            add_topic_window.exec()
-            if add_topic_window.accepted:
+            if add_topic_window.exec():
                 topic_name = add_topic_window.name_line_edit.text()
                 topic_config = {
-                    'data_format': add_topic_window.format_line_edit.text(),
-                    'interval': add_topic_window.interval_spin_box.value()
+                    "data_format": add_topic_window.format_line_edit.text(),
+                    "interval": add_topic_window.interval_spin_box.value(),
                 }
                 if validate_input(topic_name, topic_config):
                     self.__sim.add_topic(topic_name, topic_config)
@@ -67,7 +90,9 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         self.broker_hostname.textChanged.connect(on_broker_info_changed)
         self.broker_port.valueChanged.connect(on_broker_info_changed)
 
-    def __add_topic_to_item_list(self, topic: str, topic_config: dict) -> QListWidgetItem:
+    def __add_topic_to_item_list(
+        self, topic: str, topic_config: dict
+    ) -> QListWidgetItem:
         # TODO popup with edit values
 
         # layout
