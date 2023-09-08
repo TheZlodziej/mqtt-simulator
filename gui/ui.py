@@ -10,16 +10,29 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QCoreApplication
 from gui.generated.mainwindow import Ui_MainWindow
-from gui.generated.addtopicdialog import Ui_Dialog
+from gui.generated.addtopicdialog import Ui_AddTopicDialog
+from gui.generated.edittopicdialog import Ui_EditTopicDialog
 from mqttsim import MqttSim
 from functools import partial
 from logger import QListWidgetLogHandler
 
 
-class MqttSimAddTopicWindow(Ui_Dialog, QDialog):
+class MqttSimAddTopicWindow(Ui_AddTopicDialog, QDialog):
     def __init__(self):
         super(MqttSimAddTopicWindow, self).__init__()
         self.setupUi(self)
+
+
+class MqttSimEditTopicWindow(Ui_EditTopicDialog, QDialog):
+    def __init__(self, topic_name: str, topic_data: dict):
+        super(MqttSimEditTopicWindow, self).__init__()
+        self.setupUi(self)
+        self.__set_topic_values(topic_name, topic_data)
+
+    def __set_topic_values(self, topic_name, topic_data) -> None:
+        self.name_line_edit.setText(topic_name)
+        self.format_line_edit.setText(topic_data.get("data_format"))
+        self.interval_spin_box.setValue(topic_data.get("interval"))
 
 
 class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
@@ -62,7 +75,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
             self.__logger.info("Cleared logs.")
 
         def on_add_topic_btn_clicked() -> None:
-            def validate_input(topic_name, topic_config):
+            def validate_input(topic_name, topic_config) -> bool:
                 return (
                     len(topic_name) > 0
                     and topic_name not in self.__config.get_topics().keys()
@@ -106,6 +119,27 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         widget = QWidget()
         widget.setLayout(layout)
         self.topics_list.insertWidget(0, widget)
+
+        # edit btn
+        def on_edit_btn_clicked(topic: str) -> None:
+            topic_data = self.__config.get_topic_data(topic)
+            edit_topic_window = MqttSimEditTopicWindow(topic, topic_data)
+
+            if edit_topic_window.exec():
+                edited_topic_data = {
+                    "data_format": edit_topic_window.format_line_edit.text(),
+                    "interval": edit_topic_window.interval_spin_box.value(),
+                }
+                if edited_topic_data != topic_data:
+                    self.__sim.edit(topic, edited_topic_data)
+                    self.__logger.info(
+                        f"Edited topic {topic} ({topic_data} -> {edited_topic_data})."
+                    )
+
+        edit_btn = QPushButton("Edit")
+        edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        edit_btn.clicked.connect(partial(on_edit_btn_clicked, topic))
+        layout.addWidget(edit_btn)
 
         # remove btn
         def on_remove_btn_clicked(topic: str) -> None:
