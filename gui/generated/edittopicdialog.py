@@ -15,9 +15,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
-    QDoubleSpinBox, QFormLayout, QLabel, QLineEdit,
-    QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDialog,
+    QDialogButtonBox, QDoubleSpinBox, QFormLayout, QLabel,
+    QLineEdit, QSizePolicy, QVBoxLayout, QWidget)
 
 class Ui_EditTopicDialog(object):
     def setupUi(self, EditTopicDialog):
@@ -76,6 +76,12 @@ class Ui_EditTopicDialog(object):
 
         self.formLayout.setWidget(1, QFormLayout.FieldRole, self.format_line_edit)
 
+        self.manual_check_box = QCheckBox(EditTopicDialog)
+        self.manual_check_box.setObjectName(u"manual_check_box")
+        self.manual_check_box.setChecked(False)
+
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.manual_check_box)
+
 
         self.verticalLayout.addLayout(self.formLayout)
 
@@ -114,5 +120,9 @@ class Ui_EditTopicDialog(object):
         self.format_line_edit.setToolTip(QCoreApplication.translate("EditTopicDialog", u"Data format - <%randf%> will be replaced with random float value from [0; 1) range, <%randi%> will be replaced with random signed 32 bit integer, <%randu%> will be replaced with random unsigned 32 bit integer", None))
 #endif // QT_CONFIG(tooltip)
         self.format_line_edit.setText(QCoreApplication.translate("EditTopicDialog", u"-", None))
+#if QT_CONFIG(tooltip)
+        self.manual_check_box.setToolTip(QCoreApplication.translate("EditTopicDialog", u"If checked, the data will be automatically send every <interval> seconds", None))
+#endif // QT_CONFIG(tooltip)
+        self.manual_check_box.setText("")
     # retranslateUi
 
