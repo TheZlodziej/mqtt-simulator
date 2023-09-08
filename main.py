@@ -15,7 +15,7 @@ def main(args):
     # standalone functions (cmd line config edit)
     if args.add_topic:
         topic, format, interval = args.add_topic
-        config.put_topic(topic, format, interval)
+        config.put_topic(topic, format, interval, manual=False)
         return
 
     if args.set_broker:
