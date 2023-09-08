@@ -80,11 +80,13 @@ You can always create ```config.json``` file yourself if you think writing it wi
     "topics": {
         "topic1": {
             "data_format": "<%randi%>",
-            "interval": 1
+            "interval": 1,
+            "manual": false
         },
         "test/topic2": {
             "data_format": "{ 'x': '<%randu%>' }",
-            "interval": 1.5
+            "interval": 1.5,
+            "manual": false
         }
     }
 }
