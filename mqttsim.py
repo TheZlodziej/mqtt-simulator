@@ -160,3 +160,6 @@ class MqttSim:
 
     def get_config(self) -> MqttSimConfig:
         return self.__config
+
+    def edit(self, topic_name, new_data) -> None:
+        self.__config.put_topic(topic_name, new_data)
