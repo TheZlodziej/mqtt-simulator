@@ -9,12 +9,21 @@ from PySide6.QtWidgets import (
     QMessageBox,
 )
 from PySide6.QtCore import Qt, QCoreApplication
+from PySide6.QtGui import QIcon
 from gui.generated.mainwindow import Ui_MainWindow
 from gui.generated.addtopicdialog import Ui_AddTopicDialog
 from gui.generated.edittopicdialog import Ui_EditTopicDialog
 from mqttsim import MqttSim
 from functools import partial
 from logger import QListWidgetLogHandler
+import icons.generated.icons
+
+
+class MqttSimTopicPushButton(QPushButton):
+    def __init__(self, icon: str):
+        super(MqttSimTopicPushButton, self).__init__()
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setIcon(QIcon(icon))
 
 
 class MqttSimAddTopicWindow(Ui_AddTopicDialog, QDialog):
@@ -40,12 +49,17 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
     def __init__(self, sim: MqttSim):
         super(MqttSimMainWindow, self).__init__()
         self.setupUi(self)
+        self.__setup_icons()
         self.__logger = sim.get_logger()
         self.__setup_logger()
         self.__sim = sim
         self.__config = sim.get_config()
         self.__setup_connects()
         self.__set_values_from_config()
+
+    def __setup_icons(self) -> None:
+        self.setWindowIcon(QIcon(":/icons/mqtt.svg"))
+        self.add_topic_btn.setIcon(QIcon(":/icons/add.svg"))
 
     def __setup_logger(self) -> None:
         self.__logger.addHandler(QListWidgetLogHandler(self.logs_list))
@@ -123,8 +137,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         self.topics_list.insertWidget(0, widget)
 
         # send now btn
-        send_now_btn = QPushButton("Send now")
-        send_now_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        send_now_btn = MqttSimTopicPushButton(":/icons/send.svg")
         send_now_btn.clicked.connect(partial(self.__sim.send_single_message, topic))
         layout.addWidget(send_now_btn)
 
@@ -145,7 +158,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                         f"Edited topic {topic} ({topic_data} -> {edited_topic_data})."
                     )
 
-        edit_btn = QPushButton("Edit")
+        edit_btn = MqttSimTopicPushButton(":/icons/edit.svg")
         edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         edit_btn.clicked.connect(partial(on_edit_btn_clicked, topic))
         layout.addWidget(edit_btn)
@@ -155,8 +168,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
             self.__sim.remove_topic(topic)
             widget.deleteLater()
 
-        remove_btn = QPushButton("Remove")
-        remove_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        remove_btn = MqttSimTopicPushButton(":/icons/remove.svg")
         remove_btn.clicked.connect(partial(on_remove_btn_clicked, topic))
         layout.addWidget(remove_btn)
 

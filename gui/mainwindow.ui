@@ -155,7 +155,7 @@
                <string>Add topic</string>
               </property>
               <property name="text">
-               <string>Add</string>
+               <string/>
               </property>
              </widget>
             </item>
@@ -171,8 +171,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>318</width>
-               <height>337</height>
+               <width>310</width>
+               <height>324</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">

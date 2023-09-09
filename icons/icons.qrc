@@ -1,0 +1,10 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="icons">
+        <file>add.svg</file>
+        <file>edit.svg</file>
+        <file>remove.svg</file>
+        <file>mqtt.svg</file>
+        <file>send.svg</file>
+    </qresource>
+</RCC>
