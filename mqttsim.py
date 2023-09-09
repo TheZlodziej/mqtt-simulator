@@ -162,6 +162,7 @@ class MqttSim:
 
     def send_single_message(self, topic_name) -> None:
         if not self.is_connected_to_broker():
+            self.__logger.error("Trying to send message when not connected to broker.")
             return
 
         def make_data(data_format) -> str:
