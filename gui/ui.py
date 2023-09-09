@@ -136,10 +136,14 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         widget.setLayout(layout)
         self.topics_list.insertWidget(0, widget)
 
-        # send now btn
-        send_now_btn = MqttSimTopicPushButton(":/icons/send.svg")
-        send_now_btn.clicked.connect(partial(self.__sim.send_single_message, topic))
-        layout.addWidget(send_now_btn)
+        # remove btn
+        def on_remove_btn_clicked(topic: str) -> None:
+            self.__sim.remove_topic(topic)
+            widget.deleteLater()
+
+        remove_btn = MqttSimTopicPushButton(":/icons/remove.svg")
+        remove_btn.clicked.connect(partial(on_remove_btn_clicked, topic))
+        layout.addWidget(remove_btn)
 
         # edit btn
         def on_edit_btn_clicked(topic: str) -> None:
@@ -163,14 +167,10 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         edit_btn.clicked.connect(partial(on_edit_btn_clicked, topic))
         layout.addWidget(edit_btn)
 
-        # remove btn
-        def on_remove_btn_clicked(topic: str) -> None:
-            self.__sim.remove_topic(topic)
-            widget.deleteLater()
-
-        remove_btn = MqttSimTopicPushButton(":/icons/remove.svg")
-        remove_btn.clicked.connect(partial(on_remove_btn_clicked, topic))
-        layout.addWidget(remove_btn)
+        # send now btn
+        send_now_btn = MqttSimTopicPushButton(":/icons/send.svg")
+        send_now_btn.clicked.connect(partial(self.__sim.send_single_message, topic))
+        layout.addWidget(send_now_btn)
 
     def __set_values_from_config(self) -> None:
         def set_values_from_config_broker() -> None:
