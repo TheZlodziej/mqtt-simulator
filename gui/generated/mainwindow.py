@@ -98,6 +98,11 @@ class Ui_MainWindow(object):
 
         self.topics_hlayout.addWidget(self.topics_lbl)
 
+        self.topic_search_line_edit = QLineEdit(self.centralwidget)
+        self.topic_search_line_edit.setObjectName(u"topic_search_line_edit")
+
+        self.topics_hlayout.addWidget(self.topic_search_line_edit)
+
         self.add_topic_btn = QToolButton(self.centralwidget)
         self.add_topic_btn.setObjectName(u"add_topic_btn")
         self.add_topic_btn.setCursor(QCursor(Qt.PointingHandCursor))
@@ -201,6 +206,10 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(tooltip)
         self.broker_connect_btn.setText(QCoreApplication.translate("MainWindow", u"Connect", None))
         self.topics_lbl.setText(QCoreApplication.translate("MainWindow", u"Topics", None))
+#if QT_CONFIG(tooltip)
+        self.topic_search_line_edit.setToolTip(QCoreApplication.translate("MainWindow", u"Search topic by name", None))
+#endif // QT_CONFIG(tooltip)
+        self.topic_search_line_edit.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Search...", None))
 #if QT_CONFIG(tooltip)
         self.add_topic_btn.setToolTip(QCoreApplication.translate("MainWindow", u"Add topic", None))
 #endif // QT_CONFIG(tooltip)

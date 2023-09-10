@@ -138,11 +138,21 @@
            <number>1</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="topics_hlayout" stretch="0,0">
+           <layout class="QHBoxLayout" name="topics_hlayout" stretch="0,0,0">
             <item>
              <widget class="QLabel" name="topics_lbl">
               <property name="text">
                <string>Topics</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="topic_search_line_edit">
+              <property name="toolTip">
+               <string>Search topic by name</string>
+              </property>
+              <property name="placeholderText">
+               <string>Search...</string>
               </property>
              </widget>
             </item>

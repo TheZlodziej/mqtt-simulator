@@ -51,9 +51,11 @@ class MqttSimEditTopicWindow(Ui_EditTopicDialog, QDialog):
 class MqttSimTopicWidget(QWidget):
     def __init__(self, topic: str):
         super(MqttSimTopicWidget, self).__init__()
+        self.topic = topic
 
         # hlayout
         hlayout = QHBoxLayout()
+        self.setLayout(hlayout)
 
         # topic name label
         lbl = QLabel(topic)
@@ -79,20 +81,6 @@ class MqttSimTopicWidget(QWidget):
             QCoreApplication.translate("MainWindow", "Send now", None),
         )
         hlayout.addWidget(self.send_now_btn)
-
-        # vlayout
-        vlayout = QVBoxLayout()
-        f1 = QFrame()
-        f1.setFrameShape(QFrame.Shape.HLine)
-        vlayout.addWidget(f1)
-        vlayout.addLayout(hlayout)
-
-        # frame (bottom line)
-        line_frame = QFrame()
-        line_frame.setFrameShape(QFrame.Shape.HLine)
-        vlayout.addWidget(line_frame)
-
-        self.setLayout(vlayout)
 
 
 class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
@@ -163,11 +151,19 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         def on_broker_info_changed() -> None:
             self.__sim.set_broker(self.broker_hostname.text(), self.broker_port.value())
 
+        def on_topic_search_text_changed() -> None:
+            for widget in self.topics_list_widget.findChildren(MqttSimTopicWidget):
+                if self.topic_search_line_edit.text().lower() in widget.topic.lower():
+                    widget.show()
+                else:
+                    widget.hide()
+
         self.broker_connect_btn.clicked.connect(on_broker_connect_btn_clicked)
         self.clear_logs_btn.clicked.connect(on_clear_logs_btn_clicked)
         self.add_topic_btn.clicked.connect(on_add_topic_btn_clicked)
         self.broker_hostname.textChanged.connect(on_broker_info_changed)
         self.broker_port.valueChanged.connect(on_broker_info_changed)
+        self.topic_search_line_edit.textChanged.connect(on_topic_search_text_changed)
 
     def __add_topic_to_item_list(
         self, topic: str, topic_config: dict
