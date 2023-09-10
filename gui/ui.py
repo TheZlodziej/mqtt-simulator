@@ -3,10 +3,12 @@ from PySide6.QtWidgets import (
     QListWidgetItem,
     QToolButton,
     QHBoxLayout,
+    QVBoxLayout,
     QDialog,
     QLabel,
     QWidget,
     QMessageBox,
+    QFrame,
 )
 from PySide6.QtCore import Qt, QCoreApplication
 from PySide6.QtGui import QIcon
@@ -44,6 +46,53 @@ class MqttSimEditTopicWindow(Ui_EditTopicDialog, QDialog):
         self.format_line_edit.setText(topic_data.get("data_format"))
         self.interval_spin_box.setValue(topic_data.get("interval"))
         self.manual_check_box.setChecked(topic_data.get("manual"))
+
+
+class MqttSimTopicWidget(QWidget):
+    def __init__(self, topic: str):
+        super(MqttSimTopicWidget, self).__init__()
+
+        # hlayout
+        hlayout = QHBoxLayout()
+
+        # topic name label
+        lbl = QLabel(topic)
+        hlayout.addWidget(lbl)
+
+        # remove btn
+        self.remove_btn = MqttSimTopicToolButton(
+            ":/icons/remove.svg",
+            QCoreApplication.translate("MainWindow", "Remove", None),
+        )
+        hlayout.addWidget(self.remove_btn)
+
+        # edit btn
+        self.edit_btn = MqttSimTopicToolButton(
+            ":/icons/edit.svg", QCoreApplication.translate("MainWindow", "Edit", None)
+        )
+        self.edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        hlayout.addWidget(self.edit_btn)
+
+        # send now btn
+        self.send_now_btn = MqttSimTopicToolButton(
+            ":/icons/send.svg",
+            QCoreApplication.translate("MainWindow", "Send now", None),
+        )
+        hlayout.addWidget(self.send_now_btn)
+
+        # vlayout
+        vlayout = QVBoxLayout()
+        f1 = QFrame()
+        f1.setFrameShape(QFrame.Shape.HLine)
+        vlayout.addWidget(f1)
+        vlayout.addLayout(hlayout)
+
+        # frame (bottom line)
+        line_frame = QFrame()
+        line_frame.setFrameShape(QFrame.Shape.HLine)
+        vlayout.addWidget(line_frame)
+
+        self.setLayout(vlayout)
 
 
 class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
@@ -123,30 +172,12 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
     def __add_topic_to_item_list(
         self, topic: str, topic_config: dict
     ) -> QListWidgetItem:
-        # TODO popup with edit values
+        topic_widget = MqttSimTopicWidget(topic)
 
-        # layout
-        layout = QHBoxLayout()
-
-        # topic name label
-        lbl = QLabel(topic)
-        layout.addWidget(lbl)
-
-        # widget
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.topics_list.insertWidget(0, widget)
-
-        # remove btn
         def on_remove_btn_clicked(topic: str) -> None:
             self.__sim.remove_topic(topic)
-            widget.deleteLater()
+            topic_widget.deleteLater()
 
-        remove_btn = MqttSimTopicToolButton(":/icons/remove.svg", "Remove")
-        remove_btn.clicked.connect(partial(on_remove_btn_clicked, topic))
-        layout.addWidget(remove_btn)
-
-        # edit btn
         def on_edit_btn_clicked(topic: str) -> None:
             topic_data = self.__config.get_topic_data(topic)
             edit_topic_window = MqttSimEditTopicWindow(topic, topic_data)
@@ -163,15 +194,13 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                         f"Edited topic {topic} ({topic_data} -> {edited_topic_data})."
                     )
 
-        edit_btn = MqttSimTopicToolButton(":/icons/edit.svg", "Edit")
-        edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        edit_btn.clicked.connect(partial(on_edit_btn_clicked, topic))
-        layout.addWidget(edit_btn)
+        topic_widget.remove_btn.clicked.connect(partial(on_remove_btn_clicked, topic))
+        topic_widget.edit_btn.clicked.connect(partial(on_edit_btn_clicked, topic))
+        topic_widget.send_now_btn.clicked.connect(
+            partial(self.__sim.send_single_message, topic)
+        )
 
-        # send now btn
-        send_now_btn = MqttSimTopicToolButton(":/icons/send.svg", "Send now")
-        send_now_btn.clicked.connect(partial(self.__sim.send_single_message, topic))
-        layout.addWidget(send_now_btn)
+        self.topics_list.insertWidget(0, topic_widget)
 
     def __set_values_from_config(self) -> None:
         def set_values_from_config_broker() -> None:
