@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QFrame, QHBoxL
     QLabel, QLayout, QLineEdit, QListWidget,
     QListWidgetItem, QMainWindow, QPushButton, QScrollArea,
     QSizePolicy, QSpacerItem, QSpinBox, QTabWidget,
-    QVBoxLayout, QWidget)
+    QToolButton, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -98,13 +98,12 @@ class Ui_MainWindow(object):
 
         self.topics_hlayout.addWidget(self.topics_lbl)
 
-        self.add_topic_btn = QPushButton(self.centralwidget)
+        self.add_topic_btn = QToolButton(self.centralwidget)
         self.add_topic_btn.setObjectName(u"add_topic_btn")
         self.add_topic_btn.setCursor(QCursor(Qt.PointingHandCursor))
 
-        self.topics_hlayout.addWidget(self.add_topic_btn, 0, Qt.AlignRight)
+        self.topics_hlayout.addWidget(self.add_topic_btn)
 
-        self.topics_hlayout.setStretch(1, 1)
 
         self.topics_vlayout.addLayout(self.topics_hlayout)
 
@@ -113,7 +112,7 @@ class Ui_MainWindow(object):
         self.topics_list_scroll_area.setWidgetResizable(True)
         self.topics_list_widget = QWidget()
         self.topics_list_widget.setObjectName(u"topics_list_widget")
-        self.topics_list_widget.setGeometry(QRect(0, 0, 310, 324))
+        self.topics_list_widget.setGeometry(QRect(0, 0, 310, 328))
         self.verticalLayout = QVBoxLayout(self.topics_list_widget)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.topics_list = QVBoxLayout()

@@ -138,7 +138,7 @@
            <number>1</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="topics_hlayout" stretch="0,1">
+           <layout class="QHBoxLayout" name="topics_hlayout" stretch="0,0">
             <item>
              <widget class="QLabel" name="topics_lbl">
               <property name="text">
@@ -146,8 +146,8 @@
               </property>
              </widget>
             </item>
-            <item alignment="Qt::AlignRight">
-             <widget class="QPushButton" name="add_topic_btn">
+            <item>
+             <widget class="QToolButton" name="add_topic_btn">
               <property name="cursor">
                <cursorShape>PointingHandCursor</cursorShape>
               </property>
@@ -172,7 +172,7 @@
                <x>0</x>
                <y>0</y>
                <width>310</width>
-               <height>324</height>
+               <height>328</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
