@@ -20,10 +20,11 @@ import icons.generated.icons
 
 
 class MqttSimTopicToolButton(QToolButton):
-    def __init__(self, icon: str):
+    def __init__(self, icon: str, tooltip: str):
         super(MqttSimTopicToolButton, self).__init__()
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setIcon(QIcon(icon))
+        self.setToolTip(QCoreApplication.translate("MainWindow", tooltip, None))
 
 
 class MqttSimAddTopicWindow(Ui_AddTopicDialog, QDialog):
@@ -141,7 +142,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
             self.__sim.remove_topic(topic)
             widget.deleteLater()
 
-        remove_btn = MqttSimTopicToolButton(":/icons/remove.svg")
+        remove_btn = MqttSimTopicToolButton(":/icons/remove.svg", "Remove")
         remove_btn.clicked.connect(partial(on_remove_btn_clicked, topic))
         layout.addWidget(remove_btn)
 
@@ -162,13 +163,13 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                         f"Edited topic {topic} ({topic_data} -> {edited_topic_data})."
                     )
 
-        edit_btn = MqttSimTopicToolButton(":/icons/edit.svg")
+        edit_btn = MqttSimTopicToolButton(":/icons/edit.svg", "Edit")
         edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         edit_btn.clicked.connect(partial(on_edit_btn_clicked, topic))
         layout.addWidget(edit_btn)
 
         # send now btn
-        send_now_btn = MqttSimTopicToolButton(":/icons/send.svg")
+        send_now_btn = MqttSimTopicToolButton(":/icons/send.svg", "Send now")
         send_now_btn.clicked.connect(partial(self.__sim.send_single_message, topic))
         layout.addWidget(send_now_btn)
 
