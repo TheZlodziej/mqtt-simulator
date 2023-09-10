@@ -82,6 +82,11 @@ class Ui_EditTopicDialog(object):
 
         self.formLayout.setWidget(3, QFormLayout.FieldRole, self.manual_check_box)
 
+        self.manual_lbl = QLabel(EditTopicDialog)
+        self.manual_lbl.setObjectName(u"manual_lbl")
+
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.manual_lbl)
+
 
         self.verticalLayout.addLayout(self.formLayout)
 
@@ -124,5 +129,6 @@ class Ui_EditTopicDialog(object):
         self.manual_check_box.setToolTip(QCoreApplication.translate("EditTopicDialog", u"If checked, the data will be automatically send every <interval> seconds", None))
 #endif // QT_CONFIG(tooltip)
         self.manual_check_box.setText("")
+        self.manual_lbl.setText(QCoreApplication.translate("EditTopicDialog", u"Manual", None))
     # retranslateUi
 
