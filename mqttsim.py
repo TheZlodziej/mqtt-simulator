@@ -4,6 +4,7 @@ from threading import Thread
 from datetime import datetime
 from time import sleep
 from random import randint, random
+from re import match, search
 
 
 class MqttSimConfig:
@@ -48,6 +49,7 @@ class MqttSim:
     def __init__(self, config: MqttSimConfig, logger: any):
         self.__logger = logger
         self.__config = config
+        self.__file_input_data = dict()
         self.__setup_client()
         self.__setup_publishing_thread()
 
@@ -165,9 +167,32 @@ class MqttSim:
             self.__logger.error("Trying to send message when not connected to broker.")
             return
 
-        def make_data(data_format) -> str:
+        # <%file src="<path>" sep="<separator>" %>
+        def make_data_file_input(data_format: str) -> str:
+            file_input_pattern = (
+                r'<%file\s+src\s*=\s*"([^"]*)"\s*sep\s*=\s*"([^"]*)"\s*%>'
+            )
+            match = search(file_input_pattern, data_format)
+            if match:
+                src = match.group(1)
+                sep = match.group(2)
+                with open(src, "r") as file:
+                    content = file.read()
+                    all_values = content.split(sep)
+                    curr_value_idx = self.__file_input_data.get(src, 0) % len(
+                        all_values
+                    )
+                    curr_value = all_values[curr_value_idx]
+                    self.__file_input_data[src] = curr_value_idx + 1
+                    print("xd=", data_format.replace(match.group(0), curr_value))
+                    return data_format.replace(match.group(0), curr_value)
+            else:
+                return data_format
+
+        def make_data(data_format: str) -> str:
             return (
-                data_format.replace(r"<%randi%>", str(randint(-(2**31), 2**31 - 1)))
+                make_data_file_input(data_format)
+                .replace(r"<%randi%>", str(randint(-(2**31), 2**31 - 1)))
                 .replace(r"<%randf%>", str(random()))
                 .replace(r"<%randu%>", str(randint(0, 2**32 - 1)))
             )

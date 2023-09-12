@@ -43,7 +43,9 @@ class MqttSimEditTopicWindow(Ui_EditTopicDialog, QDialog):
 
     def __set_topic_values(self, topic_name, topic_data) -> None:
         self.name_line_edit.setText(topic_name)
-        self.format_line_edit.setText(topic_data.get("data_format"))
+        self.format_line_edit.setText(
+            topic_data.get("data_format").replace("\n", "&newl;")
+        )
         self.interval_spin_box.setValue(topic_data.get("interval"))
         self.manual_check_box.setChecked(topic_data.get("manual"))
 
@@ -138,7 +140,9 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
             if add_topic_window.exec():
                 topic_name = add_topic_window.name_line_edit.text()
                 topic_config = {
-                    "data_format": add_topic_window.format_line_edit.text(),
+                    "data_format": add_topic_window.format_line_edit.text().replace(
+                        "&newl;", "\n"
+                    ),
                     "interval": add_topic_window.interval_spin_box.value(),
                     "manual": add_topic_window.manual_check_box.isChecked(),
                 }
@@ -180,10 +184,13 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
 
             if edit_topic_window.exec():
                 edited_topic_data = {
-                    "data_format": edit_topic_window.format_line_edit.text(),
+                    "data_format": edit_topic_window.format_line_edit.text().replace(
+                        "&newl;", "\n"
+                    ),
                     "interval": edit_topic_window.interval_spin_box.value(),
                     "manual": edit_topic_window.manual_check_box.isChecked(),
                 }
+                print("edited", edited_topic_data)
                 if edited_topic_data != topic_data:
                     self.__sim.edit(topic, edited_topic_data)
                     self.__logger.info(
