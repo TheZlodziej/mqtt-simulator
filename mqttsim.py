@@ -4,6 +4,7 @@ from threading import Thread
 from datetime import datetime
 from time import sleep
 from random import randint, random
+from mqttsimdatagenerator import MqttSimDataGenerator
 
 
 class MqttSimConfig:
@@ -15,6 +16,7 @@ class MqttSimConfig:
     ) -> None:
         self.__config.put(f"topics.{topic}.data_format", data_format)
         self.__config.put(f"topics.{topic}.interval", interval)
+        self.__config.put(f"topics.{topic}.manual", manual)
 
     def put_topic(self, topic: str, topic_config: dict) -> None:
         self.__config.put(f"topics.{topic}", topic_config)
@@ -48,6 +50,8 @@ class MqttSim:
     def __init__(self, config: MqttSimConfig, logger: any):
         self.__logger = logger
         self.__config = config
+        self.__topic_data_generators = {topic_name: MqttSimDataGenerator(topic_config.get(
+            "data_format")) for topic_name, topic_config in self.__config.get_topics().items()}
         self.__setup_client()
         self.__setup_publishing_thread()
 
@@ -62,16 +66,17 @@ class MqttSim:
 
         topics = self.__config.get_topics()
         last_sent = {topic: datetime.now() for topic in topics.keys()}
+
         while not self.__should_stop_publishing_thread:
             if not self.is_connected_to_broker():
                 sleep(0.5)
                 continue
             now = datetime.now()
             for topic, config in topics.items():
-                if config.get("manual"):
-                    continue
                 if topic not in last_sent:
                     last_sent[topic] = now
+                    continue
+                if config.get("manual"):
                     continue
                 if time_diff_in_seconds(now, last_sent[topic]) > config.get("interval"):
                     self.send_single_message(topic)
@@ -86,7 +91,8 @@ class MqttSim:
             if rc == CONNACK_ACCEPTED:
                 self.__logger.info("Connected to broker.")
             else:
-                self.__logger.error(f"Error when connecting to broker (rc={rc}).")
+                self.__logger.error(
+                    f"Error when connecting to broker (rc={rc}).")
 
         def on_disconnect(client, userdata, rc) -> None:
             if rc == 0:
@@ -144,12 +150,15 @@ class MqttSim:
         self.__client.unsubscribe(topic)
         self.__config.remove_topic(topic)
         self.__logger.info(f"Removed topic: {topic}.")
+        del self.__topic_data_generators[topic]
 
     # Adds topic to config (and saves it into config file).
     # If publishing thread was already started, it will take the topic into account.
     def add_topic(self, topic: str, topic_config: dict) -> None:
         self.__config.put_topic(topic, topic_config)
         self.__logger.info(f"Added topic: {topic}.")
+        self.__topic_data_generators[topic] = MqttSimDataGenerator(
+            topic_config.get("data_format"))
 
     def get_logger(self) -> any:
         return self.__logger
@@ -159,19 +168,14 @@ class MqttSim:
 
     def edit(self, topic_name, new_data) -> None:
         self.__config.put_topic(topic_name, new_data)
+        self.__topic_data_generators[topic_name].reinitalize(new_data.get("data_format"))
 
     def send_single_message(self, topic_name) -> None:
         if not self.is_connected_to_broker():
-            self.__logger.error("Trying to send message when not connected to broker.")
+            self.__logger.error(
+                "Trying to send message when not connected to broker.")
             return
 
-        def make_data(data_format) -> str:
-            return (
-                data_format.replace(r"<%randi%>", str(randint(-(2**31), 2**31 - 1)))
-                .replace(r"<%randf%>", str(random()))
-                .replace(r"<%randu%>", str(randint(0, 2**32 - 1)))
-            )
-
-        topic_data = self.__config.get_topic_data(topic_name)
         self.__logger.info(f"Publishing data on {topic_name}...")
-        self.__client.publish(topic_name, make_data(topic_data.get("data_format")))
+        message = self.__topic_data_generators.get(topic_name).next_message()
+        self.__client.publish(topic_name, message)

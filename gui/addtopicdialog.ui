@@ -82,16 +82,6 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="format_line_edit">
-         <property name="toolTip">
-          <string>Data format - &lt;%randf%&gt; will be replaced with random float value from [0; 1) range, &lt;%randi%&gt; will be replaced with random signed 32 bit integer, &lt;%randu%&gt; will be replaced with random unsigned 32 bit integer</string>
-         </property>
-         <property name="text">
-          <string>{ 'data': &lt;%randi%&gt; }</string>
-         </property>
-        </widget>
-       </item>
        <item row="3" column="1">
         <widget class="QCheckBox" name="manual_check_box">
          <property name="toolTip">
@@ -109,6 +99,13 @@
         <widget class="QLabel" name="manual_lbl">
          <property name="text">
           <string>Manual</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPlainTextEdit" name="format_text_edit">
+         <property name="plainText">
+          <string>{ 'data': &lt;%randi%&gt; }</string>
          </property>
         </widget>
        </item>

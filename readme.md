@@ -3,42 +3,36 @@ After cloning the repo, before running the app you need to install requirements 
 ```
 pip install -r requirements.txt
 ```
-# Running the app
-There are two modes for this app
-
-## command line mode
-In order to run the app in command line mode you should first set up config file either manually or using command line tools:
-
-- set up broker with following:
+then, to start the app run
 ```
-python main.py -sb <host: string> <port: int>
-```
-or equivalent
-```
-python main.py --set-broker <host: string> <port: int>
-```
-for example
-```
-python main.py -sb mybroker.com 4444
-```
----
-- set up topics with following:
-```
-python main.py -at <topic name: string> <data format: string> <interval in seconds: float>
-```
-or equivalent
-```
-python main.py --add-topic <topic name: string> <data format: string> <interval in seconds: float>
-```
-for example
-```
-python main.py -at "my/topic" '{"data": {"x": <%randi%> }}' 1.5
+python main.py
 ```
 
-To modify topic, simply override it with new values.
+## Arguments
+You can run the app with several arguments described below:
 
----
-<b>Data format</b> is a string containg formula for a message. Assume we want to revieve messages in following format
+| command       | shortened | arguments                                                             | example                                      | description                                         |
+| ------------- | --------- | --------------------------------------------------------------------- | -------------------------------------------- | --------------------------------------------------- |
+| `--set-broker` | `-sb`      | host (string), port (int)                                                         | python main.py -sb localhost 1883            | sets current broker                                 |
+| `--add-topic`  | `-at`      | topic name (string), data format (string), interval [seconds] (float) | python main.py -at "my/topic" "<%randi%>" 10 | adds topic to list                                  |
+| `--no-gui`     | `-nogui`   | \-                                                                    | python main.py -nogui                        | launches app without gui                            |
+| `--verbose`    | `-v`      | \-                                                                    | python main.py -v                            | prints logs to console in addition to logs.txt file |
+
+## Data format
+Data format is a string containg formula for a message. Additionally, data format functions can accept arguments. Here is table with each function and argument described
+
+| function | accepted arguments                         | default                   | example data format                     | description                                                                                                                                          |
+| -------- | ------------------------------------------ | ------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `randi`   | `min` (int), `max` (int)                       | min = -2^31, max = 2^31-1 | <%randi min=-10 max=10%>                | Sends random int from [min; max] range                                                                                                               |
+| `randu`    | `min` (int), `max` (int)                       | min = 0, max = 2^32 - 1   | <%randu min=10 max=20%>                 | Sends random uint from [min; max] range                                                                                                              |
+| `randf`    | `min` (float), `max` (float)                   | min = 0, max = 1          | <%randf min=-1 max=16.9%>               | Sends random float from [min; max) range                                                                                                             |
+| `rands`    | `collection` (list of strings), `length` (int) | length = 10               | <%rands collection=["a", "ab", 'abc']%> | Sends random string from given collection or generates random string with given length. If both arguments are passed, it will prioritize collection. |
+| `file`     | `src` (string), `separator` (string)           | separator = ","           | <%file src="test.txt" separator="\\n"%> | Sends data from file one by one                                                                                                                      |
+Keep in mind that <b>you dont always have to pass in all the arguments</b>. If you skip any (for example max in ```randi```, it will use the default value).
+
+### Example
+Assume we want to revieve messages with following format
+
 ```json
 {
     "data": {
@@ -47,27 +41,11 @@ To modify topic, simply override it with new values.
     }
 }
 ```
-To achieve this, we can use placeholders for int32, uint32 and float in out data_format. The placeholders are
-- ```<%randi%>``` for random int32
-- ```<%randu%>``` for random uint32
-- ```<%randf%>``` for random float in [0; 1) range
-  
+
 Our <b>Data format</b> would then be
 ```json
 { "data": { "x": "<%randi%>", "y": "<%randf%>" } }
 ```
----
-After setting up the broker and topics you'd like to use, you would simply run
-```
-python main.py -nogui
-```
-or equivalent
-```
-python main.py --no-gui
-```
-
-If you want to print logs to the console (in addition to the ```logs.txt``` file), you can add ```--verbose``` or ```-v``` to the end of the command.
-
 
 ### Manual setup of config file
 You can always create ```config.json``` file yourself if you think writing it with the command line tool is too tedious - simply follow the format below
@@ -93,21 +71,5 @@ You can always create ```config.json``` file yourself if you think writing it wi
 ```
 > result - app publishes random value on 'topic 1' every second
 
-## GUI mode
-To run the app in GUI mode, you can simply run
-```
-python main.py
-```
-without any additional arguments. This should launch a QT application that is very simple to navigate.
-Down below are some screenshots of the app.
-
+## Screenshots
 <b>[INSERT IMGS HERE]</b>
-
-# TLDR
-- You are running the main.py file
-- Available args
-    - `--no-gui` / `-nogui` - doesn't launch GUI
-    - `--verbose` / `-v` - prints logs to console (in addition to `logs.txt` file)
-    - `--add-topic` / `-at` `<topic name> <data format> <interval>` - adds topic to config
-    - `--set-broker` / `-sb` `<hostname> <port>` - sets broker (default is localhost:1883)
-- GUI mode is pretty self explanatory - you simply launch the app without any additional args
