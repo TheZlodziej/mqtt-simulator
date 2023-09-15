@@ -70,7 +70,7 @@ You can always create ```config.json``` file yourself if you think writing it wi
     }
 }
 ```
-> result - app publishes random value on 'topic 1' every second
+> result - app publishes random int value on 'topic1' every second and random uint value on 'test/topic2'
 
 ## Screenshots
 <b>[INSERT IMGS HERE]</b>
