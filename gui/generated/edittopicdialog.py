@@ -17,13 +17,14 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDialog,
     QDialogButtonBox, QDoubleSpinBox, QFormLayout, QLabel,
-    QLineEdit, QSizePolicy, QVBoxLayout, QWidget)
+    QLineEdit, QPlainTextEdit, QSizePolicy, QVBoxLayout,
+    QWidget)
 
 class Ui_EditTopicDialog(object):
     def setupUi(self, EditTopicDialog):
         if not EditTopicDialog.objectName():
             EditTopicDialog.setObjectName(u"EditTopicDialog")
-        EditTopicDialog.resize(399, 207)
+        EditTopicDialog.resize(399, 216)
         font = QFont()
         font.setPointSize(12)
         EditTopicDialog.setFont(font)
@@ -71,11 +72,6 @@ class Ui_EditTopicDialog(object):
 
         self.formLayout.setWidget(0, QFormLayout.FieldRole, self.name_line_edit)
 
-        self.format_line_edit = QLineEdit(EditTopicDialog)
-        self.format_line_edit.setObjectName(u"format_line_edit")
-
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.format_line_edit)
-
         self.manual_check_box = QCheckBox(EditTopicDialog)
         self.manual_check_box.setObjectName(u"manual_check_box")
         self.manual_check_box.setChecked(False)
@@ -86,6 +82,11 @@ class Ui_EditTopicDialog(object):
         self.manual_lbl.setObjectName(u"manual_lbl")
 
         self.formLayout.setWidget(3, QFormLayout.LabelRole, self.manual_lbl)
+
+        self.format_text_edit = QPlainTextEdit(EditTopicDialog)
+        self.format_text_edit.setObjectName(u"format_text_edit")
+
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.format_text_edit)
 
 
         self.verticalLayout.addLayout(self.formLayout)
@@ -122,13 +123,10 @@ class Ui_EditTopicDialog(object):
 #endif // QT_CONFIG(tooltip)
         self.name_line_edit.setText(QCoreApplication.translate("EditTopicDialog", u"-", None))
 #if QT_CONFIG(tooltip)
-        self.format_line_edit.setToolTip(QCoreApplication.translate("EditTopicDialog", u"Data format - <%randf%> will be replaced with random float value from [0; 1) range, <%randi%> will be replaced with random signed 32 bit integer, <%randu%> will be replaced with random unsigned 32 bit integer", None))
-#endif // QT_CONFIG(tooltip)
-        self.format_line_edit.setText(QCoreApplication.translate("EditTopicDialog", u"-", None))
-#if QT_CONFIG(tooltip)
         self.manual_check_box.setToolTip(QCoreApplication.translate("EditTopicDialog", u"If checked, the data will be automatically send every <interval> seconds", None))
 #endif // QT_CONFIG(tooltip)
         self.manual_check_box.setText("")
         self.manual_lbl.setText(QCoreApplication.translate("EditTopicDialog", u"Manual", None))
+        self.format_text_edit.setPlainText(QCoreApplication.translate("EditTopicDialog", u"-", None))
     # retranslateUi
 

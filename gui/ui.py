@@ -26,7 +26,8 @@ class MqttSimTopicToolButton(QToolButton):
         super(MqttSimTopicToolButton, self).__init__()
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setIcon(QIcon(icon))
-        self.setToolTip(QCoreApplication.translate("MainWindow", tooltip, None))
+        self.setToolTip(QCoreApplication.translate(
+            "MainWindow", tooltip, None))
 
 
 class MqttSimAddTopicWindow(Ui_AddTopicDialog, QDialog):
@@ -43,8 +44,8 @@ class MqttSimEditTopicWindow(Ui_EditTopicDialog, QDialog):
 
     def __set_topic_values(self, topic_name, topic_data) -> None:
         self.name_line_edit.setText(topic_name)
-        self.format_line_edit.setText(
-            topic_data.get("data_format").replace("\n", "&newl;")
+        self.format_text_edit.setPlainText(
+            topic_data.get("data_format")
         )
         self.interval_spin_box.setValue(topic_data.get("interval"))
         self.manual_check_box.setChecked(topic_data.get("manual"))
@@ -72,7 +73,8 @@ class MqttSimTopicWidget(QWidget):
 
         # edit btn
         self.edit_btn = MqttSimTopicToolButton(
-            ":/icons/edit.svg", QCoreApplication.translate("MainWindow", "Edit", None)
+            ":/icons/edit.svg", QCoreApplication.translate(
+                "MainWindow", "Edit", None)
         )
         self.edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         hlayout.addWidget(self.edit_btn)
@@ -112,12 +114,14 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                     QCoreApplication.translate("MainWindow", "Connect", None)
                 )
                 self.broker_connect_btn.setToolTip(
-                    QCoreApplication.translate("MainWindow", "Connect to broker", None)
+                    QCoreApplication.translate(
+                        "MainWindow", "Connect to broker", None)
                 )
             else:
                 if self.__sim.connect_to_broker():
                     self.broker_connect_btn.setText(
-                        QCoreApplication.translate("MainWindow", "Disconnect", None)
+                        QCoreApplication.translate(
+                            "MainWindow", "Disconnect", None)
                     )
                     self.broker_connect_btn.setToolTip(
                         QCoreApplication.translate(
@@ -140,9 +144,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
             if add_topic_window.exec():
                 topic_name = add_topic_window.name_line_edit.text()
                 topic_config = {
-                    "data_format": add_topic_window.format_line_edit.text().replace(
-                        "&newl;", "\n"
-                    ),
+                    "data_format": add_topic_window.format_text_edit.toPlainText(),
                     "interval": add_topic_window.interval_spin_box.value(),
                     "manual": add_topic_window.manual_check_box.isChecked(),
                 }
@@ -153,7 +155,8 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                     QMessageBox().critical(self, "Error!", "Invalid topic input.")
 
         def on_broker_info_changed() -> None:
-            self.__sim.set_broker(self.broker_hostname.text(), self.broker_port.value())
+            self.__sim.set_broker(
+                self.broker_hostname.text(), self.broker_port.value())
 
         def on_topic_search_text_changed() -> None:
             for widget in self.topics_list_widget.findChildren(MqttSimTopicWidget):
@@ -167,7 +170,8 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         self.add_topic_btn.clicked.connect(on_add_topic_btn_clicked)
         self.broker_hostname.textChanged.connect(on_broker_info_changed)
         self.broker_port.valueChanged.connect(on_broker_info_changed)
-        self.topic_search_line_edit.textChanged.connect(on_topic_search_text_changed)
+        self.topic_search_line_edit.textChanged.connect(
+            on_topic_search_text_changed)
 
     def __add_topic_to_item_list(
         self, topic: str, topic_config: dict
@@ -184,9 +188,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
 
             if edit_topic_window.exec():
                 edited_topic_data = {
-                    "data_format": edit_topic_window.format_line_edit.text().replace(
-                        "&newl;", "\n"
-                    ),
+                    "data_format": edit_topic_window.format_text_edit.toPlainText(),
                     "interval": edit_topic_window.interval_spin_box.value(),
                     "manual": edit_topic_window.manual_check_box.isChecked(),
                 }
@@ -197,8 +199,10 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                         f"Edited topic {topic} ({topic_data} -> {edited_topic_data})."
                     )
 
-        topic_widget.remove_btn.clicked.connect(partial(on_remove_btn_clicked, topic))
-        topic_widget.edit_btn.clicked.connect(partial(on_edit_btn_clicked, topic))
+        topic_widget.remove_btn.clicked.connect(
+            partial(on_remove_btn_clicked, topic))
+        topic_widget.edit_btn.clicked.connect(
+            partial(on_edit_btn_clicked, topic))
         topic_widget.send_now_btn.clicked.connect(
             partial(self.__sim.send_single_message, topic)
         )
