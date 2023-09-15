@@ -34,6 +34,7 @@ class MqttSimAddTopicWindow(Ui_AddTopicDialog, QDialog):
     def __init__(self):
         super(MqttSimAddTopicWindow, self).__init__()
         self.setupUi(self)
+        self.setWindowIcon(QIcon(":/icons/mqtt.svg"))
 
 
 class MqttSimEditTopicWindow(Ui_EditTopicDialog, QDialog):
@@ -41,6 +42,7 @@ class MqttSimEditTopicWindow(Ui_EditTopicDialog, QDialog):
         super(MqttSimEditTopicWindow, self).__init__()
         self.setupUi(self)
         self.__set_topic_values(topic_name, topic_data)
+        self.setWindowIcon(QIcon(":/icons/mqtt.svg"))
 
     def __set_topic_values(self, topic_name, topic_data) -> None:
         self.name_line_edit.setText(topic_name)
@@ -192,7 +194,6 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                     "interval": edit_topic_window.interval_spin_box.value(),
                     "manual": edit_topic_window.manual_check_box.isChecked(),
                 }
-                print("edited", edited_topic_data)
                 if edited_topic_data != topic_data:
                     self.__sim.edit(topic, edited_topic_data)
                     self.__logger.info(
