@@ -28,6 +28,7 @@ Data format is a string containg formula for a message. Additionally, data forma
 | `randf`    | `min` (float), `max` (float)                   | min = 0, max = 1          | <%randf min=-1 max=16.9%>               | Sends random float from [min; max) range                                                                                                             |
 | `rands`    | `collection` (list of strings), `length` (int) | length = 10               | <%rands collection=["a", "ab", 'abc']%> | Sends random string from given collection or generates random string with given length. If both arguments are passed, it will prioritize collection. |
 | `file`     | `src` (string), `separator` (string)           | separator = ","           | <%file src="test.txt" separator="\\n"%> | Sends data from file one by one                                                                                                                      |
+
 Keep in mind that <b>you dont always have to pass in all the arguments</b>. If you skip any (for example max in ```randi```, it will use the default value).
 
 ### Example
