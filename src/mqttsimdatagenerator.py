@@ -35,14 +35,12 @@ class MqttSimDataGenerator:
             'file': self.__init_file
         }
 
-        print(matches)
         # replacement functions found
         for match in matches:
             id = str(uuid())
             to_replace = match[0]
             function = match[1]
             args = match[2]
-            print(function, "args="+args)
             function_mapper.get(function)(id, args)
             self.__format_str = self.__format_str.replace(
                 to_replace, f"{{{id}}}", 1)
