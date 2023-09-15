@@ -73,4 +73,20 @@ You can always create ```config.json``` file yourself if you think writing it wi
 > result - app publishes random int value on 'topic1' every second and random uint value on 'test/topic2'
 
 ## Screenshots
-<b>[INSERT IMGS HERE]</b>
+<p align="center">
+  <img src="./images/app.png">
+  <br>
+Main window
+</p>
+
+<p align="center">
+  <img src="./images/add.png">
+  <br>
+Add topic window
+</p>
+
+<p align="center">
+  <img src="./images/edit.png">
+  <br>
+Edit topic window
+</p>
