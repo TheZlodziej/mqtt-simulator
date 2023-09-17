@@ -21,7 +21,7 @@ class MqttSimDataGenerator:
         self.__make_formatted_string(data_format)
 
     def __make_formatted_string(self, data_format):
-        function_pattern = r"(<%([a-zA-Z]+) *((?:(?:[^ ]+)=(?:[^ ]+) *)+)? *%>)"
+        function_pattern = r'(<%([a-zA-Z]+) *((?:(?:[^ ]+)=(?:(?:[^ ]+)|(?:[\[][^\]]*[\]])|(?:[\'"][^\'"]*[\'"])) *)+)? *%>)'
         matches = findall(function_pattern, data_format)
 
         self.__replace_dict = dict()
@@ -56,12 +56,11 @@ class MqttSimDataGenerator:
         return (min_val, max_val)
 
     def __extract_collection_length_or_none(self, args: str) -> (list | None, int | None):
-        collection_match = search(r"collection=\[(.*?)\]", args)
+        collection_match = search(r'collection=\[([^\]])*\]', args)
         length_match = search(r"length=(\d+)", args)
-
         if collection_match is not None:
-            collection_value = collection_match.group(1)
-            collection_strings = findall(r'["\']([^"\']+)["\']', collection_value) if collection_value else []
+            collection_value = collection_match.group(0)
+            collection_strings = findall(r'["\']([^"\']*)["\']', collection_value) if collection_value else []
             return (collection_strings, None)
 
         length_val = int(length_match.group(1)) if length_match is not None else None
@@ -161,7 +160,8 @@ class MqttSimDataGenerator:
     # <%rands length=5%> -> returns random string with length = 5
     # <%rands%> -> returns random string with length = default = 10
     # if both length and collection are defined, the function will return random string from collection
+    # if collection is empty it will print random string with given/default length
     def __next_rands(self, collection: list | None, length: int | None) -> str:
-        if collection is not None:
+        if collection is not None and collection:
             return choice(collection)
         return "".join(choice(ascii_letters) for _ in range(length))
