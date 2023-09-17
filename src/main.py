@@ -48,10 +48,15 @@ def main(args: Namespace):
             except KeyboardInterrupt:
                 break
     else:
-        app = QApplication()
-        window = MqttSimMainWindow(sim)
-        window.show()
-        app.exec()
+        try:
+            app = QApplication()
+            window = MqttSimMainWindow(sim)
+            window.show()
+            app.exec()
+        except KeyboardInterrupt:
+            app.quit()
+        except Exception as e:
+            logger.error(e)
     sim.stop()
     # end sim setup
 
