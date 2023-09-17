@@ -40,7 +40,8 @@ def main(args: Namespace):
     sim.start()
     if args.no_gui:
         if not sim.connect_to_broker():
-            exit(1)
+            logger.critical("Could not connect to broker.")
+            return
         while True:
             try:
                 sleep(0.1)  # dummy task
@@ -86,3 +87,4 @@ def create_parser() -> ArgumentParser:
 
 if __name__ == "__main__":
     main(create_parser().parse_args())
+    exit(0)
