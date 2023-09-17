@@ -1,5 +1,5 @@
 from mqttsim import MqttSim, MqttSimConfig
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from logging import getLogger, Formatter, FileHandler, DEBUG, StreamHandler
 from PySide6.QtWidgets import QApplication
 from gui.ui import MqttSimMainWindow
@@ -7,7 +7,7 @@ from sys import stdout, exit
 from time import sleep
 
 
-def main(args):
+def main(args: Namespace):
     # config setup
     config = MqttSimConfig("config.json")
     # end config setup
@@ -15,7 +15,8 @@ def main(args):
     # standalone functions (cmd line config edit)
     if args.add_topic:
         topic, format, interval = args.add_topic
-        config.put_topic(topic, format, interval, manual=False)
+        topic_config = {"interval": interval, "format": format, "manual": False}
+        config.put_topic(topic, topic_config)
         return
 
     if args.set_broker:
@@ -55,18 +56,14 @@ def main(args):
 
 
 def create_parser() -> ArgumentParser:
-    parser = ArgumentParser(
-        prog="mqtt simulator", description="simulate flow of data over mqtt"
-    )
+    parser = ArgumentParser(prog="mqtt simulator", description="simulate flow of data over mqtt")
     parser.add_argument(
         "-nogui",
         "--no-gui",
         action="store_true",
         help="Specify whether the app should launch without graphical user interface",
     )
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Print logs in console"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Print logs in console")
 
     parser.add_argument(
         "-at",
