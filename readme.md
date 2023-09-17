@@ -26,10 +26,16 @@ Data format is a string containg formula for a message. Additionally, data forma
 | `randi`   | `min` (int), `max` (int)                       | min = -2^31, max = 2^31-1 | <%randi min=-10 max=10%>                | Sends random int from [min; max] range                                                                                                               |
 | `randu`    | `min` (int), `max` (int)                       | min = 0, max = 2^32 - 1   | <%randu min=10 max=20%>                 | Sends random uint from [min; max] range                                                                                                              |
 | `randf`    | `min` (float), `max` (float)                   | min = 0, max = 1          | <%randf min=-1 max=16.9%>               | Sends random float from [min; max) range                                                                                                             |
-| `rands`    | `collection` (list of strings), `length` (int) | length = 10               | <%rands collection=["a", "ab", 'abc']%> | Sends random string from given collection or generates random string with given length. If both arguments are passed, it will prioritize collection. |
+| `rands`    | `collection` (list of strings), `length` (int) | length = 10               | <%rands collection=["a","ab",'abc']%> | Sends random string from given collection or generates random string with given length. If both arguments are passed, it will prioritize collection. |
 | `file`     | `src` (string), `separator` (string)           | separator = ","           | <%file src="test.txt" separator="\\n"%> | Sends data from file one by one                                                                                                                      |
 
 Keep in mind that <b>you dont always have to pass in all the arguments</b>. If you skip any (for example max in ```randi```, it will use the default value).
+
+Argument value cannot contain space characters unless it's a string or a list (starts with `'`, `"` or `[`). For example: 
+- ```<%rands collection=["x", "y"]%>``` - OK (collection value uses `[` ... `]`)
+- ```<%rands collection= ["x", "y"]%>``` - ERROR (space before opening square bracket)
+- ```<%file src="hello world.txt"%>``` - OK (src value uses `"` ... `"`)
+- ```<%randi max= 10%>``` - ERROR (space after parameter value)
 
 ### Example
 Assume we want to revieve messages with following format
