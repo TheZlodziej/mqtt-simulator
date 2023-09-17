@@ -3,7 +3,6 @@ from paho.mqtt.client import Client, CONNACK_ACCEPTED
 from threading import Thread
 from datetime import datetime
 from time import sleep
-from random import randint, random
 from mqttsimdatagenerator import MqttSimDataGenerator
 
 
@@ -11,14 +10,12 @@ class MqttSimConfig:
     def __init__(self, path: str):
         self.__config = ConfigHandler(path)
 
-    def put_topic(
-        self, topic: str, data_format: str, interval: float = 1.5, manual: bool = False
-    ) -> None:
+    def put_topic(self, topic: str, data_format: str, interval: float = 1.5, manual: bool = False) -> None:
         self.__config.put(f"topics.{topic}.data_format", data_format)
         self.__config.put(f"topics.{topic}.interval", interval)
         self.__config.put(f"topics.{topic}.manual", manual)
 
-    def put_topic(self, topic: str, topic_config: dict) -> None:
+    def put_topic(self, topic: str, topic_config: dict[str, str]) -> None:
         self.__config.put(f"topics.{topic}", topic_config)
 
     def get_topic_data(self, topic: str) -> dict | None:
@@ -28,7 +25,7 @@ class MqttSimConfig:
         self.__config.put("broker.host", host)
         self.__config.put("broker.port", port)
 
-    def get_broker(self) -> (str, int):
+    def get_broker(self) -> tuple[str, int]:
         broker_info = self.__config.get("broker")
         if broker_info is None:
             self.__config.put("broker", {"host": "localhost", "port": 1883})
@@ -50,8 +47,9 @@ class MqttSim:
     def __init__(self, config: MqttSimConfig, logger: any):
         self.__logger = logger
         self.__config = config
-        self.__topic_data_generators = {topic_name: MqttSimDataGenerator(topic_config.get(
-            "data_format")) for topic_name, topic_config in self.__config.get_topics().items()}
+        self.__topic_data_generators = {
+            topic_name: MqttSimDataGenerator(topic_config.get("data_format")) for topic_name, topic_config in self.__config.get_topics().items()
+        }
         self.__setup_client()
         self.__setup_publishing_thread()
 
@@ -91,8 +89,7 @@ class MqttSim:
             if rc == CONNACK_ACCEPTED:
                 self.__logger.info("Connected to broker.")
             else:
-                self.__logger.error(
-                    f"Error when connecting to broker (rc={rc}).")
+                self.__logger.error(f"Error when connecting to broker (rc={rc}).")
 
         def on_disconnect(client, userdata, rc) -> None:
             if rc == 0:
@@ -106,7 +103,7 @@ class MqttSim:
         self.__client.on_disconnect = on_disconnect
 
     # start publishing thread
-    def start(self) -> bool:
+    def start(self) -> None:
         self.__publishing_thread.start()
 
     # disconnect from broker, stop publishing thread and wait for it to join
@@ -129,9 +126,7 @@ class MqttSim:
             self.__logger.error(f"Coulnd't connect to broker {host}:{port}.")
             return False
         except Exception:
-            self.__logger.error(
-                f"Unknown error occured when trying to connect to broker."
-            )
+            self.__logger.error(f"Unknown error occured when trying to connect to broker.")
             return False
         return True
 
@@ -157,8 +152,7 @@ class MqttSim:
     def add_topic(self, topic: str, topic_config: dict) -> None:
         self.__config.put_topic(topic, topic_config)
         self.__logger.info(f"Added topic: {topic}.")
-        self.__topic_data_generators[topic] = MqttSimDataGenerator(
-            topic_config.get("data_format"))
+        self.__topic_data_generators[topic] = MqttSimDataGenerator(topic_config.get("data_format"))
 
     def get_logger(self) -> any:
         return self.__logger
@@ -172,8 +166,7 @@ class MqttSim:
 
     def send_single_message(self, topic_name) -> None:
         if not self.is_connected_to_broker():
-            self.__logger.error(
-                "Trying to send message when not connected to broker.")
+            self.__logger.error("Trying to send message when not connected to broker.")
             return
 
         self.__logger.info(f"Publishing data on {topic_name}...")

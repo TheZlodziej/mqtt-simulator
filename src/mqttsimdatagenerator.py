@@ -16,23 +16,23 @@ class MqttSimDataGenerator:
         return message
 
     def reinitalize(self, data_format):
-        if hasattr(self, '__file_data'):
-            delattr(self, '__file_data')
+        if hasattr(self, "__file_data"):
+            delattr(self, "__file_data")
         self.__make_formatted_string(data_format)
 
     def __make_formatted_string(self, data_format):
-        function_pattern = r'(<%([a-zA-Z]+) *((?:(?:[^ ]+)=(?:[^ ]+) *)+)? *%>)'
+        function_pattern = r"(<%([a-zA-Z]+) *((?:(?:[^ ]+)=(?:[^ ]+) *)+)? *%>)"
         matches = findall(function_pattern, data_format)
 
         self.__replace_dict = dict()
         self.__format_str = data_format
 
         function_mapper = {
-            'randi': self.__init_randi,
-            'randf': self.__init_randf,
-            'randu': self.__init_randu,
-            'rands': self.__init_rands,
-            'file': self.__init_file
+            "randi": self.__init_randi,
+            "randf": self.__init_randf,
+            "randu": self.__init_randu,
+            "rands": self.__init_rands,
+            "file": self.__init_file,
         }
 
         # replacement functions found
@@ -41,33 +41,30 @@ class MqttSimDataGenerator:
             to_replace = match[0]
             function = match[1]
             args = match[2]
+            if function not in function_mapper.keys():
+                continue
             function_mapper.get(function)(id, args)
-            self.__format_str = self.__format_str.replace(
-                to_replace, f"{{{id}}}", 1)
+            self.__format_str = self.__format_str.replace(to_replace, f"{{{id}}}", 1)
 
     def __extract_min_max_or_default(self, args: str, dflt: (int | float, int | float), conv_fun: object) -> (int | float, int | float):
-        min_match = search(r'min=(-?\d+)', args)
-        max_match = search(r'max=(-?\d+)', args)
+        min_match = search(r"min=(-?\d+)", args)
+        max_match = search(r"max=(-?\d+)", args)
 
-        min_val = conv_fun(min_match.group(
-            1)) if min_match is not None else dflt[0]
-        max_val = conv_fun(max_match.group(
-            1)) if max_match is not None else dflt[1]
+        min_val = conv_fun(min_match.group(1)) if min_match is not None else dflt[0]
+        max_val = conv_fun(max_match.group(1)) if max_match is not None else dflt[1]
 
         return (min_val, max_val)
 
     def __extract_collection_length_or_none(self, args: str) -> (list | None, int | None):
-        collection_match = search(r'collection=\[(.*?)\]', args)
-        length_match = search(r'length=(\d+)', args)
+        collection_match = search(r"collection=\[(.*?)\]", args)
+        length_match = search(r"length=(\d+)", args)
 
         if collection_match is not None:
             collection_value = collection_match.group(1)
-            collection_strings = findall(
-                r'["\']([^"\']+)["\']', collection_value) if collection_value else []
+            collection_strings = findall(r'["\']([^"\']+)["\']', collection_value) if collection_value else []
             return (collection_strings, None)
 
-        length_val = int(length_match.group(
-            1)) if length_match is not None else None
+        length_val = int(length_match.group(1)) if length_match is not None else None
         return (None, length_val)
 
     def __extract_src_and_separator_or_default(self, args: str, dflt: (str | None, str)) -> (str | None, str):
@@ -75,51 +72,41 @@ class MqttSimDataGenerator:
         separator_match = search(r'separator=["\'](.*?)["\']', args)
 
         src_value = src_match.group(1) if src_match is not None else dflt[0]
-        separator_value = separator_match.group(
-            1) if separator_match is not None else dflt[1]
+        separator_value = separator_match.group(1) if separator_match is not None else dflt[1]
         return (src_value, separator_value)
 
     def __init_file(self, id: str, args: str) -> None:
-        if not hasattr(self, '__file_data'):
+        if not hasattr(self, "__file_data"):
             self.__file_data = dict()
 
-        splitted_file_content = ['no file source']
-        src_val, separator_val = self.__extract_src_and_separator_or_default(
-            args, (None, "\n"))
+        splitted_file_content = ["no file source"]
+        src_val, separator_val = self.__extract_src_and_separator_or_default(args, (None, "\n"))
 
         if src_val is not None:
             try:
                 with open(src_val, "r") as file:
                     splitted_file_content = file.read().split(separator_val)
             except FileNotFoundError:
-                splitted_file_content = ['file not found']
+                splitted_file_content = ["file not found"]
 
-        self.__file_data[id] = {
-            'content': splitted_file_content,
-            'index': 0
-        }
+        self.__file_data[id] = {"content": splitted_file_content, "index": 0}
         self.__replace_dict[id] = partial(self.__next_file_value, id)
 
     def __init_randi(self, id: str, args: str) -> None:
-        min_val, max_val = self.__extract_min_max_or_default(
-            args, (-2**31, 2**31-1), int)
+        min_val, max_val = self.__extract_min_max_or_default(args, (-(2**31), 2**31 - 1), int)
         self.__replace_dict[id] = partial(self.__next_randi, min_val, max_val)
 
     def __init_randu(self, id: str, args: str) -> None:
-        min_val, max_val = self.__extract_min_max_or_default(
-            args, (0, 2**32), int)
+        min_val, max_val = self.__extract_min_max_or_default(args, (0, 2**32), int)
         self.__replace_dict[id] = partial(self.__next_randu, min_val, max_val)
 
     def __init_randf(self, id: str, args: str) -> None:
-        min_val, max_val = self.__extract_min_max_or_default(
-            args, (0, 1), float)
+        min_val, max_val = self.__extract_min_max_or_default(args, (0, 1), float)
         self.__replace_dict[id] = partial(self.__next_randf, min_val, max_val)
 
     def __init_rands(self, id: str, args: str) -> None:
-        collection_val, length_val = self.__extract_collection_length_or_none(
-            args)
-        self.__replace_dict[id] = partial(
-            self.__next_rands, collection_val, length_val)
+        collection_val, length_val = self.__extract_collection_length_or_none(args)
+        self.__replace_dict[id] = partial(self.__next_rands, collection_val, length_val)
 
     # handle randf
     # returns random float from given range (default = [0; 1)
@@ -160,9 +147,9 @@ class MqttSimDataGenerator:
 
     def __next_file_value(self, id):
         file_data = self.__file_data.get(id)
-        idx = file_data['index']
-        data = file_data['content']
-        file_data['index'] = (idx + 1) % len(data)
+        idx = file_data["index"]
+        data = file_data["content"]
+        file_data["index"] = (idx + 1) % len(data)
         return data[idx]
 
     # handle rands
@@ -177,4 +164,4 @@ class MqttSimDataGenerator:
     def __next_rands(self, collection: list | None, length: int | None) -> str:
         if collection is not None:
             return choice(collection)
-        return ''.join(choice(ascii_letters) for _ in range(length))
+        return "".join(choice(ascii_letters) for _ in range(length))
