@@ -33,7 +33,7 @@ class MqttSimDataGenerator:
             "randu": self.__init_randu,
             "rands": self.__init_rands,
             "file": self.__init_file,
-            "timenow": self.__init_timenow,
+            "time": self.__init_time,
         }
 
         # replacement functions found
@@ -108,8 +108,8 @@ class MqttSimDataGenerator:
         collection_val, length_val = self.__extract_collection_length_or_none(args)
         self.__replace_dict[id] = partial(self.__next_rands, collection_val, length_val)
 
-    def __init_timenow(self, id: str, args: str) -> None:
-        self.__replace_dict[id] = self.__next_timenow
+    def __init_time(self, id: str, args: str) -> None:
+        self.__replace_dict[id] = self.__next_time
 
     # handle randf
     # returns random float from given range (default = [0; 1)
@@ -171,10 +171,10 @@ class MqttSimDataGenerator:
         return "".join(choice(ascii_letters) for _ in range(length))
     
 
-    # handle timenow
+    # handle time
     # returns current time
     #
     # example
     # <%time%> -> returns datetime.now().time()
-    def __next_timenow(self) -> str:
+    def __next_time(self) -> str:
         return str(datetime.now().time())
