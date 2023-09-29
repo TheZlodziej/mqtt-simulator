@@ -24,7 +24,7 @@ class Ui_AddTopicDialog(object):
     def setupUi(self, AddTopicDialog):
         if not AddTopicDialog.objectName():
             AddTopicDialog.setObjectName(u"AddTopicDialog")
-        AddTopicDialog.resize(399, 224)
+        AddTopicDialog.resize(399, 251)
         font = QFont()
         font.setPointSize(12)
         AddTopicDialog.setFont(font)
@@ -125,6 +125,6 @@ class Ui_AddTopicDialog(object):
 #endif // QT_CONFIG(tooltip)
         self.manual_check_box.setText("")
         self.manual_lbl.setText(QCoreApplication.translate("AddTopicDialog", u"Manual", None))
-        self.format_text_edit.setPlainText(QCoreApplication.translate("AddTopicDialog", u"{ 'data': <%randi%> }", None))
+        self.format_text_edit.setPlainText(QCoreApplication.translate("AddTopicDialog", u"{ \"data\": <%randi%> }", None))
     # retranslateUi
 
