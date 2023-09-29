@@ -145,15 +145,15 @@ class MqttSimDataGenerator:
         return self.__next_randi(min, max)
 
     # handle file
-    # returns next value from file
+    # returns next value from file as string
     # if it reaches end of file, it will start over
 
-    def __next_file_value(self, id):
+    def __next_file_value(self, id) -> str:
         file_data = self.__file_data.get(id)
         idx = file_data["index"]
         data = file_data["content"]
         file_data["index"] = (idx + 1) % len(data)
-        return data[idx]
+        return f'"{data[idx]}"'
 
     # handle rands
     # returns random element from collection (length is ignored) or
@@ -167,14 +167,14 @@ class MqttSimDataGenerator:
     # if collection is empty it will print random string with given/default length
     def __next_rands(self, collection: list | None, length: int | None) -> str:
         if collection is not None and collection:
-            return choice(collection)
-        return "".join(choice(ascii_letters) for _ in range(length))
+            return f'"{choice(collection)}"'
+        return f'"{"".join(choice(ascii_letters) for _ in range(length if length is not None else 10))}"'
     
 
     # handle time
     # returns current time
     #
     # example
-    # <%time%> -> returns datetime.now().time()
+    # <%time%> -> returns current time as string
     def __next_time(self) -> str:
-        return str(datetime.now().time())
+        return f'"{str(datetime.now().time())}"'
