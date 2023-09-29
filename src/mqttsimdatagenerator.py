@@ -3,7 +3,7 @@ from string import ascii_letters
 from re import findall, search
 from uuid import uuid1 as uuid
 from functools import partial
-
+from datetime import datetime
 
 class MqttSimDataGenerator:
     def __init__(self, data_format: str):
@@ -33,6 +33,7 @@ class MqttSimDataGenerator:
             "randu": self.__init_randu,
             "rands": self.__init_rands,
             "file": self.__init_file,
+            "timenow": self.__init_timenow,
         }
 
         # replacement functions found
@@ -107,6 +108,9 @@ class MqttSimDataGenerator:
         collection_val, length_val = self.__extract_collection_length_or_none(args)
         self.__replace_dict[id] = partial(self.__next_rands, collection_val, length_val)
 
+    def __init_timenow(self, id: str, args: str) -> None:
+        self.__replace_dict[id] = self.__next_timenow
+
     # handle randf
     # returns random float from given range (default = [0; 1)
     #
@@ -165,3 +169,12 @@ class MqttSimDataGenerator:
         if collection is not None and collection:
             return choice(collection)
         return "".join(choice(ascii_letters) for _ in range(length))
+    
+
+    # handle timenow
+    # returns current time
+    #
+    # example
+    # <%time%> -> returns datetime.now().time()
+    def __next_timenow(self) -> str:
+        return str(datetime.now().time())
