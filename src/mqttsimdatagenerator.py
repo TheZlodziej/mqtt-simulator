@@ -112,12 +112,12 @@ class MqttSimDataGenerator:
         self.__replace_dict[id] = self.__next_time
 
     # handle randf
-    # returns random float from given range (default = [0; 1)
+    # returns random float from given range (default = [0; 1]
     #
     # example
-    # <%randf%> -> returns float from [0; 1)
-    # <%randf min=-1%> -> returns float from [-1; 1)
-    # <%randf min=-1 max=10%> -> returns float from [-1; 10)
+    # <%randf%> -> returns float from [0; 1]
+    # <%randf min=-1%> -> returns float from [-1; 1]
+    # <%randf min=-1 max=10%> -> returns float from [-1; 10]
     def __next_randf(self, min: float, max: float) -> float:
         return uniform(min, max)
 
