@@ -48,9 +48,9 @@ class MqttSimDataGenerator:
             self.__format_str = self.__format_str.replace(to_replace, f"{{{id}}}", 1)
 
     def __extract_min_max_or_default(self, args: str, dflt: (int | float, int | float), conv_fun: object) -> (int | float, int | float):
-        min_match = search(r"min=(-?\d+)", args)
-        max_match = search(r"max=(-?\d+)", args)
-
+        min_match = search(r"min=(-?\d*.\d+)", args)
+        max_match = search(r"min=(-?\d*.\d+)", args)
+        
         min_val = conv_fun(min_match.group(1)) if min_match is not None else dflt[0]
         max_val = conv_fun(max_match.group(1)) if max_match is not None else dflt[1]
 
