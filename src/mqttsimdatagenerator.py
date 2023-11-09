@@ -1,4 +1,4 @@
-from random import randint, random, choice
+from random import randint, choice, uniform
 from string import ascii_letters
 from re import findall, search
 from uuid import uuid1 as uuid
@@ -50,7 +50,7 @@ class MqttSimDataGenerator:
     def __extract_min_max_or_default(self, args: str, dflt: (int | float, int | float), conv_fun: object) -> (int | float, int | float):
         min_match = search(r"min=(-?\d*.\d+)", args)
         max_match = search(r"min=(-?\d*.\d+)", args)
-        
+
         min_val = conv_fun(min_match.group(1)) if min_match is not None else dflt[0]
         max_val = conv_fun(max_match.group(1)) if max_match is not None else dflt[1]
 
@@ -119,7 +119,7 @@ class MqttSimDataGenerator:
     # <%randf min=-1%> -> returns float from [-1; 1)
     # <%randf min=-1 max=10%> -> returns float from [-1; 10)
     def __next_randf(self, min: float, max: float) -> float:
-        return min + random() * (max - min)
+        return uniform(min, max)
 
     # handle randi
     # returns random int from given range (default = [-max uint32; max uint32])
