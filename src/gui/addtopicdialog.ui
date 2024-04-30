@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>399</width>
-    <height>251</height>
+    <height>280</height>
    </rect>
   </property>
   <property name="font">
@@ -21,7 +21,7 @@
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
-     <item alignment="Qt::AlignTop">
+     <item alignment="Qt::AlignmentFlag::AlignTop">
       <widget class="QLabel" name="label">
        <property name="font">
         <font>
@@ -35,10 +35,29 @@
      </item>
      <item>
       <layout class="QFormLayout" name="formLayout">
+       <property name="fieldGrowthPolicy">
+        <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
+       </property>
+       <property name="verticalSpacing">
+        <number>5</number>
+       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="name_lbl">
          <property name="text">
           <string>Name</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="name_line_edit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Name of topic</string>
          </property>
         </widget>
        </item>
@@ -49,15 +68,65 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
+       <item row="1" column="1">
+        <layout class="QVBoxLayout" name="format_vlayout">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QPlainTextEdit" name="format_text_edit">
+           <property name="plainText">
+            <string>{ &quot;data&quot;: &lt;%randi%&gt; }</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="format_hlayout" stretch="0,0">
+           <property name="sizeConstraint">
+            <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+           </property>
+           <item>
+            <spacer name="load_from_file_hspacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="load_from_file_btn">
+             <property name="cursor">
+              <cursorShape>PointingHandCursor</cursorShape>
+             </property>
+             <property name="text">
+              <string>Load from file</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item row="3" column="0">
         <widget class="QLabel" name="interval_lbl">
          <property name="text">
           <string>Interval (seconds)</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="3" column="1">
         <widget class="QDoubleSpinBox" name="interval_spin_box">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="toolTip">
           <string>Interval of incoming data</string>
          </property>
@@ -75,14 +144,14 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="name_line_edit">
-         <property name="toolTip">
-          <string>Name of topic</string>
+       <item row="5" column="0">
+        <widget class="QLabel" name="manual_lbl">
+         <property name="text">
+          <string>Manual</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="5" column="1">
         <widget class="QCheckBox" name="manual_check_box">
          <property name="toolTip">
           <string>If checked, the data will be automatically send every &lt;interval&gt; seconds</string>
@@ -95,31 +164,20 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="manual_lbl">
-         <property name="text">
-          <string>Manual</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QPlainTextEdit" name="format_text_edit">
-         <property name="plainText">
-          <string>{ &quot;data&quot;: &lt;%randi%&gt; }</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </item>
     </layout>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
      </property>
     </widget>
    </item>
