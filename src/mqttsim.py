@@ -10,7 +10,9 @@ class MqttSimConfig:
     def __init__(self, path: str):
         self.__config = ConfigHandler(path)
 
-    def put_topic(self, topic: str, data_format: str, interval: float = 1.5, manual: bool = False) -> None:
+    def put_topic(
+        self, topic: str, data_format: str, interval: float = 1.5, manual: bool = False
+    ) -> None:
         self.__config.put(f"topics.{topic}.data_format", data_format)
         self.__config.put(f"topics.{topic}.interval", interval)
         self.__config.put(f"topics.{topic}.manual", manual)
@@ -48,7 +50,8 @@ class MqttSim:
         self.__logger = logger
         self.__config = config
         self.__topic_data_generators = {
-            topic_name: MqttSimDataGenerator(topic_config.get("data_format")) for topic_name, topic_config in self.__config.get_topics().items()
+            topic_name: MqttSimDataGenerator(topic_config.get("data_format"))
+            for topic_name, topic_config in self.__config.get_topics().items()
         }
         self.__setup_client()
         self.__setup_publishing_thread()
@@ -126,7 +129,9 @@ class MqttSim:
             self.__logger.error(f"Coulnd't connect to broker {host}:{port}.")
             return False
         except Exception:
-            self.__logger.error(f"Unknown error occured when trying to connect to broker.")
+            self.__logger.error(
+                f"Unknown error occured when trying to connect to broker."
+            )
             return False
         return True
 
@@ -152,7 +157,9 @@ class MqttSim:
     def add_topic(self, topic: str, topic_config: dict) -> None:
         self.__config.put_topic(topic, topic_config)
         self.__logger.info(f"Added topic: {topic}.")
-        self.__topic_data_generators[topic] = MqttSimDataGenerator(topic_config.get("data_format"))
+        self.__topic_data_generators[topic] = MqttSimDataGenerator(
+            topic_config.get("data_format")
+        )
 
     def get_logger(self) -> any:
         return self.__logger
@@ -162,7 +169,9 @@ class MqttSim:
 
     def edit(self, topic_name, new_data) -> None:
         self.__config.put_topic(topic_name, new_data)
-        self.__topic_data_generators[topic_name].reinitalize(new_data.get("data_format"))
+        self.__topic_data_generators[topic_name].reinitalize(
+            new_data.get("data_format")
+        )
 
     def send_single_message(self, topic_name) -> None:
         if not self.is_connected_to_broker():
