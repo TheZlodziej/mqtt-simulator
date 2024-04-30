@@ -1,12 +1,37 @@
-# Setup
-After cloning the repo, before running the app you need to install requirements using following command
-```
-pip install -r requirements.txt
-```
-then, to start the app run
-```
-python main.py
-```
+## Setup
+After cloning the repo, before running the app you need to install required packages. I recommend using virtual environment (venv) for this:
+
+- First create the virtual environment:
+  ```
+  python3 -m venv <your-venv-name>
+  ```
+
+- Then you need to activate the environment:
+
+    #### MacOS
+    ```
+    source <your-venv-name>/bin/activate
+    ```
+
+    #### Windows
+    - using cmd
+        ```
+        <your-venv-name>/Scripts/activate.bat
+        ```
+
+    - using powershell
+        ```
+        <your-venv-name>/Scripts/Activate.ps1
+        ```
+
+- Once environment is activated, install required packages
+    ```
+    python3 install -r requirements.txt
+    ```
+- Run the app using
+    ```
+    python3 main.py
+    ```
 
 ## Arguments
 You can run the app with several arguments described below:
@@ -90,10 +115,4 @@ Main window
   <img src="./images/add.png">
   <br>
 Add topic window
-</p>
-
-<p align="center">
-  <img src="./images/edit.png">
-  <br>
-Edit topic window
 </p>
