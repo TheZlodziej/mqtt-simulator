@@ -13,7 +13,6 @@ from PySide6.QtCore import Qt, QCoreApplication
 from PySide6.QtGui import QIcon
 from gui.generated.mainwindow import Ui_MainWindow
 from gui.generated.addtopicdialog import Ui_AddTopicDialog
-from gui.generated.edittopicdialog import Ui_EditTopicDialog
 from mqttsim import MqttSim
 from functools import partial
 from logger import QListWidgetLogHandler
@@ -47,12 +46,16 @@ class MqttSimAddTopicWindow(Ui_AddTopicDialog, QDialog):
             self.format_text_edit.setPlainText(file.read())
 
 
-class MqttSimEditTopicWindow(Ui_EditTopicDialog, QDialog):
+class MqttSimEditTopicWindow(MqttSimAddTopicWindow):
     def __init__(self, topic_name: str, topic_data: dict):
         super(MqttSimEditTopicWindow, self).__init__()
-        self.setupUi(self)
         self.__set_topic_values(topic_name, topic_data)
-        self.setWindowIcon(QIcon(":/icons/mqtt.svg"))
+        self.setWindowTitle(
+            QCoreApplication.translate("EditTopicDialog", "Edit topic", None)
+        )
+        self.label.setText(
+            QCoreApplication.translate("EditTopicDialog", "Edit topic", None)
+        )
 
     def __set_topic_values(self, topic_name, topic_data) -> None:
         self.name_line_edit.setText(topic_name)
