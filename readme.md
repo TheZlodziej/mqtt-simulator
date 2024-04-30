@@ -32,6 +32,11 @@ After cloning the repo, before running the app you need to install required pack
     ```
     python3 main.py
     ```
+- To quit the app use the exit button in gui (or Ctrl+C in CLI mode)
+- To quit virtual environment, type
+    ```
+    deactivate
+    ```
 
 ## Arguments
 You can run the app with several arguments described below:
@@ -95,7 +100,7 @@ You can always create ```config.json``` file yourself if you think writing it wi
             "manual": false
         },
         "test/topic2": {
-            "data_format": "{ 'x': '<%randu%>' }",
+            "data_format": "{ \"x\": \"<%randu%>\" }",
             "interval": 1.5,
             "manual": false
         }
@@ -105,6 +110,7 @@ You can always create ```config.json``` file yourself if you think writing it wi
 > result - app publishes random int value on 'topic1' every second and random uint value on 'test/topic2'
 
 ## Screenshots
+Keep in mind that the look of the app is dependent on user's system - QT uses native components.
 <p align="center">
   <img src="./images/app.png">
   <br>
