@@ -99,7 +99,7 @@ class MqttSimDataGenerator:
         if src_val is not None:
             try:
                 with open(src_val, "r") as file:
-                    if separator_val is None:
+                    if separator_val is None or separator_val == "None":
                         splitted_file_content = [file.read()]
                     else:
                         splitted_file_content = file.read().split(separator_val)

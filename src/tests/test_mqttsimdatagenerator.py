@@ -67,7 +67,7 @@ class TestMqttSimDataGenerator(unittest.TestCase):
         #   message: "hello world"
         # }
         #
-        generator = MqttSimDataGenerator('<%file src="test2.csv"%>')
+        generator = MqttSimDataGenerator('<%file src="test2.csv" separator="None"%>')
         self.assertEqual(generator.next_message(), '"{\n    message: "hello world"\n}"')
         self.assertEqual(generator.next_message(), '"{\n    message: "hello world"\n}"')
 
