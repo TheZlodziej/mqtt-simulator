@@ -76,8 +76,8 @@ class MqttSimDataGenerator:
         return (None, length_val)
 
     def __extract_src_and_separator_or_default(
-        self, args: str, dflt: (str | None, str)
-    ) -> (str | None, str):
+        self, args: str, dflt: tuple[str | None, str]
+    ) -> tuple[str | None, str]:
         src_match = search(r'src=["\'](.*?)["\']', args)
         separator_match = search(r'separator=["\'](.*?)["\']', args)
 
