@@ -1,0 +1,7 @@
+{
+    "timestamp": <%time%>,
+    "data": {
+        "value": <%randf min=0 max=100 %>,
+        "unit": "°C"
+    }
+}
