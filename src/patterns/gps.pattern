@@ -3,6 +3,6 @@
     "data": {
         "latitude": <%randf min=-1.57079632679 max=1.57079632679 %>,
         "longitude": <%randf min=-3.14159265359 max=3.14159265359 %>,
-        "unit": "°C"
+        "unit": "rad"
     }
 }

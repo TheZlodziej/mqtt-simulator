@@ -1,0 +1,7 @@
+{
+    "timestamp": <%time%>,
+    "data": {
+        "value": <%randu max=150 %>,
+        "unit": "m/s"
+    }
+}
