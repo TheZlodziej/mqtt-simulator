@@ -15,17 +15,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDialog,
-    QDialogButtonBox, QDoubleSpinBox, QFormLayout, QHBoxLayout,
-    QLabel, QLayout, QLineEdit, QPlainTextEdit,
-    QPushButton, QSizePolicy, QSpacerItem, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QComboBox,
+    QDialog, QDialogButtonBox, QDoubleSpinBox, QFrame,
+    QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit,
+    QPushButton, QSizePolicy, QVBoxLayout, QWidget)
 
 class Ui_AddTopicDialog(object):
     def setupUi(self, AddTopicDialog):
         if not AddTopicDialog.objectName():
             AddTopicDialog.setObjectName(u"AddTopicDialog")
-        AddTopicDialog.resize(399, 280)
+        AddTopicDialog.resize(438, 397)
         font = QFont()
         font.setPointSize(12)
         AddTopicDialog.setFont(font)
@@ -39,16 +38,21 @@ class Ui_AddTopicDialog(object):
         font1.setPointSize(14)
         self.label.setFont(font1)
 
-        self.verticalLayout.addWidget(self.label, 0, Qt.AlignmentFlag.AlignTop)
+        self.verticalLayout.addWidget(self.label)
 
-        self.formLayout = QFormLayout()
-        self.formLayout.setObjectName(u"formLayout")
-        self.formLayout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
-        self.formLayout.setVerticalSpacing(5)
+        self.line = QFrame(AddTopicDialog)
+        self.line.setObjectName(u"line")
+        self.line.setFrameShape(QFrame.Shape.HLine)
+        self.line.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.verticalLayout.addWidget(self.line)
+
+        self.name_hlayout = QHBoxLayout()
+        self.name_hlayout.setObjectName(u"name_hlayout")
         self.name_lbl = QLabel(AddTopicDialog)
         self.name_lbl.setObjectName(u"name_lbl")
 
-        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.name_lbl)
+        self.name_hlayout.addWidget(self.name_lbl)
 
         self.name_line_edit = QLineEdit(AddTopicDialog)
         self.name_line_edit.setObjectName(u"name_line_edit")
@@ -58,44 +62,58 @@ class Ui_AddTopicDialog(object):
         sizePolicy.setHeightForWidth(self.name_line_edit.sizePolicy().hasHeightForWidth())
         self.name_line_edit.setSizePolicy(sizePolicy)
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.name_line_edit)
+        self.name_hlayout.addWidget(self.name_line_edit)
 
+
+        self.verticalLayout.addLayout(self.name_hlayout)
+
+        self.format_vlayout = QVBoxLayout()
+#ifndef Q_OS_MAC
+        self.format_vlayout.setSpacing(-1)
+#endif
+        self.format_vlayout.setObjectName(u"format_vlayout")
         self.format_lbl = QLabel(AddTopicDialog)
         self.format_lbl.setObjectName(u"format_lbl")
 
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.format_lbl)
+        self.format_vlayout.addWidget(self.format_lbl)
 
-        self.format_vlayout = QVBoxLayout()
-        self.format_vlayout.setSpacing(0)
-        self.format_vlayout.setObjectName(u"format_vlayout")
         self.format_text_edit = QPlainTextEdit(AddTopicDialog)
         self.format_text_edit.setObjectName(u"format_text_edit")
 
         self.format_vlayout.addWidget(self.format_text_edit)
 
-        self.format_hlayout = QHBoxLayout()
-        self.format_hlayout.setObjectName(u"format_hlayout")
-        self.format_hlayout.setSizeConstraint(QLayout.SizeConstraint.SetDefaultConstraint)
-        self.load_from_file_hspacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.format_btns_layout = QHBoxLayout()
+        self.format_btns_layout.setObjectName(u"format_btns_layout")
+        self.predefined_pattern_combo_box = QComboBox(AddTopicDialog)
+        self.predefined_pattern_combo_box.setObjectName(u"predefined_pattern_combo_box")
+        self.predefined_pattern_combo_box.setCursor(QCursor(Qt.PointingHandCursor))
 
-        self.format_hlayout.addItem(self.load_from_file_hspacer)
+        self.format_btns_layout.addWidget(self.predefined_pattern_combo_box)
+
+        self.save_as_pattern_btn = QPushButton(AddTopicDialog)
+        self.save_as_pattern_btn.setObjectName(u"save_as_pattern_btn")
+        self.save_as_pattern_btn.setCursor(QCursor(Qt.PointingHandCursor))
+
+        self.format_btns_layout.addWidget(self.save_as_pattern_btn)
 
         self.load_from_file_btn = QPushButton(AddTopicDialog)
         self.load_from_file_btn.setObjectName(u"load_from_file_btn")
         self.load_from_file_btn.setCursor(QCursor(Qt.PointingHandCursor))
 
-        self.format_hlayout.addWidget(self.load_from_file_btn)
+        self.format_btns_layout.addWidget(self.load_from_file_btn)
 
 
-        self.format_vlayout.addLayout(self.format_hlayout)
+        self.format_vlayout.addLayout(self.format_btns_layout)
 
 
-        self.formLayout.setLayout(1, QFormLayout.FieldRole, self.format_vlayout)
+        self.verticalLayout.addLayout(self.format_vlayout)
 
+        self.interval_hlayout = QHBoxLayout()
+        self.interval_hlayout.setObjectName(u"interval_hlayout")
         self.interval_lbl = QLabel(AddTopicDialog)
         self.interval_lbl.setObjectName(u"interval_lbl")
 
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.interval_lbl)
+        self.interval_hlayout.addWidget(self.interval_lbl)
 
         self.interval_spin_box = QDoubleSpinBox(AddTopicDialog)
         self.interval_spin_box.setObjectName(u"interval_spin_box")
@@ -109,24 +127,37 @@ class Ui_AddTopicDialog(object):
         self.interval_spin_box.setSingleStep(0.500000000000000)
         self.interval_spin_box.setValue(1.500000000000000)
 
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.interval_spin_box)
+        self.interval_hlayout.addWidget(self.interval_spin_box)
 
         self.manual_lbl = QLabel(AddTopicDialog)
         self.manual_lbl.setObjectName(u"manual_lbl")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.manual_lbl.sizePolicy().hasHeightForWidth())
+        self.manual_lbl.setSizePolicy(sizePolicy2)
 
-        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.manual_lbl)
+        self.interval_hlayout.addWidget(self.manual_lbl)
 
         self.manual_check_box = QCheckBox(AddTopicDialog)
         self.manual_check_box.setObjectName(u"manual_check_box")
+        self.manual_check_box.setCursor(QCursor(Qt.PointingHandCursor))
         self.manual_check_box.setChecked(False)
 
-        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.manual_check_box)
+        self.interval_hlayout.addWidget(self.manual_check_box)
 
 
-        self.verticalLayout.addLayout(self.formLayout)
+        self.verticalLayout.addLayout(self.interval_hlayout)
 
 
         self.verticalLayout_2.addLayout(self.verticalLayout)
+
+        self.line_2 = QFrame(AddTopicDialog)
+        self.line_2.setObjectName(u"line_2")
+        self.line_2.setFrameShape(QFrame.Shape.HLine)
+        self.line_2.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.verticalLayout_2.addWidget(self.line_2)
 
         self.buttonBox = QDialogButtonBox(AddTopicDialog)
         self.buttonBox.setObjectName(u"buttonBox")
@@ -153,6 +184,8 @@ class Ui_AddTopicDialog(object):
 #endif // QT_CONFIG(tooltip)
         self.format_lbl.setText(QCoreApplication.translate("AddTopicDialog", u"Format", None))
         self.format_text_edit.setPlainText(QCoreApplication.translate("AddTopicDialog", u"{ \"data\": <%randi%> }", None))
+        self.predefined_pattern_combo_box.setPlaceholderText(QCoreApplication.translate("AddTopicDialog", u"Predefined pattern", None))
+        self.save_as_pattern_btn.setText(QCoreApplication.translate("AddTopicDialog", u"Save as pattern", None))
         self.load_from_file_btn.setText(QCoreApplication.translate("AddTopicDialog", u"Load from file", None))
         self.interval_lbl.setText(QCoreApplication.translate("AddTopicDialog", u"Interval (seconds)", None))
 #if QT_CONFIG(tooltip)
