@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QWidget,
     QMessageBox,
     QFileDialog,
+    QInputDialog,
 )
 from PySide6.QtCore import Qt, QCoreApplication
 from PySide6.QtGui import QIcon
@@ -16,6 +17,7 @@ from gui.generated.addtopicdialog import Ui_AddTopicDialog
 from mqttsim import MqttSim
 from functools import partial
 from logger import QListWidgetLogHandler
+from os import listdir, path, getcwd
 import icons.generated.icons
 
 
@@ -33,6 +35,11 @@ class MqttSimAddTopicWindow(Ui_AddTopicDialog, QDialog):
         self.setupUi(self)
         self.setWindowIcon(QIcon(":/icons/mqtt.svg"))
         self.load_from_file_btn.clicked.connect(self.__on_load_from_file_btn_clicked)
+        self.__load_patterns()
+        self.predefined_pattern_combo_box.currentIndexChanged.connect(
+            self.__on_pattern_selected
+        )
+        self.save_as_pattern_btn.clicked.connect(self.__on_save_as_pattern_btn_clicked)
 
     def __on_load_from_file_btn_clicked(self) -> None:
         filename, _ = QFileDialog.getOpenFileName(
@@ -41,9 +48,78 @@ class MqttSimAddTopicWindow(Ui_AddTopicDialog, QDialog):
             None,
             "All files (*.*);;Text files (*.txt);;JSON files (*.json)",
         )
-        print(filename)
+
+        if len(filename) == 0:
+            return
+
         with open(filename, "r") as file:
             self.format_text_edit.setPlainText(file.read())
+
+    def __on_pattern_selected(self, index):
+        pattern_name = self.predefined_pattern_combo_box.itemText(index)
+        pattern_data = self.predefined_pattern_combo_box.itemData(index)
+
+        response = QMessageBox.question(
+            self,
+            "Confirm action",
+            f"Are you sure you want to load {pattern_name}? This will erase all data in format input.",
+            QMessageBox.Ok | QMessageBox.Cancel,
+        )
+
+        if response == QMessageBox.Ok:
+            self.format_text_edit.setPlainText(pattern_data)
+        else:
+            self.predefined_pattern_combo_box.blockSignals(True)
+            self.predefined_pattern_combo_box.setCurrentIndex(-1)
+            self.predefined_pattern_combo_box.blockSignals(False)
+
+    def __load_patterns(self):
+        self.predefined_pattern_combo_box.clear()
+
+        patterns_dir = path.join(getcwd(), "patterns")
+        pattern_filenames = [
+            path.join(patterns_dir, file)
+            for file in listdir(patterns_dir)
+            if path.isfile(path.join(patterns_dir, file))
+        ]
+
+        for pattern_filename in pattern_filenames:
+            with open(pattern_filename, "r") as file:
+                pattern_name = path.splitext(
+                    path.basename(pattern_filename).replace("_", " ")
+                )[0]
+                pattern_value = file.read()
+                self.predefined_pattern_combo_box.addItem(pattern_name, pattern_value)
+
+    def __on_save_as_pattern_btn_clicked(self):
+        pattern_name, accepted = QInputDialog.getText(
+            self, "Input dialog", "Pattern name:"
+        )
+        if not accepted:
+            return
+
+        if len(pattern_name) == 0:
+            QMessageBox.critical(
+                self, "Error", "Pattern name cannot be empty.", QMessageBox.Ok
+            )
+            return
+
+        pattern_filename = pattern_name.replace(" ", "_") + ".pattern"
+        pattern_path = path.join(getcwd(), "patterns", pattern_filename)
+
+        if path.exists(pattern_path):
+            result = QMessageBox.warning(
+                self,
+                "Warning",
+                "Pattern with this name already exists. Do you want to overwrite it?",
+                QMessageBox.Yes | QMessageBox.No,
+            )
+            if result == QMessageBox.No:
+                return
+
+        with open(pattern_path, "w") as file:
+            file.write(self.format_text_edit.toPlainText())
+        self.__load_patterns()
 
 
 class MqttSimEditTopicWindow(MqttSimAddTopicWindow):
