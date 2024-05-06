@@ -15,7 +15,8 @@ def main(args: Namespace):
     # standalone functions (cmd line config edit)
     if args.add_topic:
         topic, format, interval = args.add_topic
-        topic_config = {"interval": interval, "format": format, "manual": False}
+        topic_config = {"interval": interval,
+                        "format": format, "manual": False}
         config.put_topic(topic, topic_config)
         return
 
@@ -29,7 +30,8 @@ def main(args: Namespace):
     logger = getLogger("MqttSimLogger")
     logger.setLevel(DEBUG)
     file_handler = FileHandler("logs.txt")
-    file_handler.setFormatter(Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+    file_handler.setFormatter(
+        Formatter("%(asctime)s - %(levelname)s - %(message)s"))
     logger.addHandler(file_handler)
     if args.verbose:
         logger.addHandler(StreamHandler(stdout))
@@ -44,7 +46,7 @@ def main(args: Namespace):
             return
         while True:
             try:
-                sleep(0.1)  # dummy task
+                sleep(0.1)  # dummy task/ busy waiting
             except KeyboardInterrupt:
                 break
     else:
@@ -62,14 +64,16 @@ def main(args: Namespace):
 
 
 def create_parser() -> ArgumentParser:
-    parser = ArgumentParser(prog="mqtt simulator", description="simulate flow of data over mqtt")
+    parser = ArgumentParser(prog="mqtt simulator",
+                            description="simulate flow of data over mqtt")
     parser.add_argument(
         "-nogui",
         "--no-gui",
         action="store_true",
         help="Specify whether the app should launch without graphical user interface",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print logs in console")
+    parser.add_argument("-v", "--verbose", action="store_true",
+                        help="Print logs in console")
 
     parser.add_argument(
         "-at",

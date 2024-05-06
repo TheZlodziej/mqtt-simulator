@@ -97,3 +97,6 @@ Add topic window
   <br>
 Edit topic window
 </p>
+
+# Protobuf
+To use protobuf messages please place compiled *.py in protofiles folder.

@@ -5,6 +5,7 @@ from uuid import uuid1 as uuid
 from functools import partial
 from datetime import datetime
 
+
 class MqttSimDataGenerator:
     def __init__(self, data_format: str):
         self.__make_formatted_string(data_format)
@@ -45,14 +46,17 @@ class MqttSimDataGenerator:
             if function not in function_mapper.keys():
                 continue
             function_mapper.get(function)(id, args)
-            self.__format_str = self.__format_str.replace(to_replace, f"{{{id}}}", 1)
+            self.__format_str = self.__format_str.replace(
+                to_replace, f"{{{id}}}", 1)
 
     def __extract_min_max_or_default(self, args: str, dflt: (int | float, int | float), conv_fun: object) -> (int | float, int | float):
         min_match = search(r"min=(-?\d*.\d+)", args)
         max_match = search(r"min=(-?\d*.\d+)", args)
 
-        min_val = conv_fun(min_match.group(1)) if min_match is not None else dflt[0]
-        max_val = conv_fun(max_match.group(1)) if max_match is not None else dflt[1]
+        min_val = conv_fun(min_match.group(
+            1)) if min_match is not None else dflt[0]
+        max_val = conv_fun(max_match.group(
+            1)) if max_match is not None else dflt[1]
 
         return (min_val, max_val)
 
@@ -61,10 +65,12 @@ class MqttSimDataGenerator:
         length_match = search(r"length=(\d+)", args)
         if collection_match is not None:
             collection_value = collection_match.group(0)
-            collection_strings = findall(r'["\']([^"\']*)["\']', collection_value) if collection_value else []
+            collection_strings = findall(
+                r'["\']([^"\']*)["\']', collection_value) if collection_value else []
             return (collection_strings, None)
 
-        length_val = int(length_match.group(1)) if length_match is not None else None
+        length_val = int(length_match.group(
+            1)) if length_match is not None else None
         return (None, length_val)
 
     def __extract_src_and_separator_or_default(self, args: str, dflt: (str | None, str)) -> (str | None, str):
@@ -72,7 +78,8 @@ class MqttSimDataGenerator:
         separator_match = search(r'separator=["\'](.*?)["\']', args)
 
         src_value = src_match.group(1) if src_match is not None else dflt[0]
-        separator_value = separator_match.group(1) if separator_match is not None else dflt[1]
+        separator_value = separator_match.group(
+            1) if separator_match is not None else dflt[1]
         return (src_value, separator_value)
 
     def __init_file(self, id: str, args: str) -> None:
@@ -80,7 +87,8 @@ class MqttSimDataGenerator:
             self.__file_data = dict()
 
         splitted_file_content = ["no file source"]
-        src_val, separator_val = self.__extract_src_and_separator_or_default(args, (None, "\n"))
+        src_val, separator_val = self.__extract_src_and_separator_or_default(
+            args, (None, "\n"))
 
         if src_val is not None:
             try:
@@ -93,20 +101,25 @@ class MqttSimDataGenerator:
         self.__replace_dict[id] = partial(self.__next_file_value, id)
 
     def __init_randi(self, id: str, args: str) -> None:
-        min_val, max_val = self.__extract_min_max_or_default(args, (-(2**31), 2**31 - 1), int)
+        min_val, max_val = self.__extract_min_max_or_default(
+            args, (-(2**31), 2**31 - 1), int)
         self.__replace_dict[id] = partial(self.__next_randi, min_val, max_val)
 
     def __init_randu(self, id: str, args: str) -> None:
-        min_val, max_val = self.__extract_min_max_or_default(args, (0, 2**32), int)
+        min_val, max_val = self.__extract_min_max_or_default(
+            args, (0, 2**32), int)
         self.__replace_dict[id] = partial(self.__next_randu, min_val, max_val)
 
     def __init_randf(self, id: str, args: str) -> None:
-        min_val, max_val = self.__extract_min_max_or_default(args, (0, 1), float)
+        min_val, max_val = self.__extract_min_max_or_default(
+            args, (0, 1), float)
         self.__replace_dict[id] = partial(self.__next_randf, min_val, max_val)
 
     def __init_rands(self, id: str, args: str) -> None:
-        collection_val, length_val = self.__extract_collection_length_or_none(args)
-        self.__replace_dict[id] = partial(self.__next_rands, collection_val, length_val)
+        collection_val, length_val = self.__extract_collection_length_or_none(
+            args)
+        self.__replace_dict[id] = partial(
+            self.__next_rands, collection_val, length_val)
 
     def __init_time(self, id: str, args: str) -> None:
         self.__replace_dict[id] = self.__next_time
@@ -169,12 +182,12 @@ class MqttSimDataGenerator:
         if collection is not None and collection:
             return f'"{choice(collection)}"'
         return f'"{"".join(choice(ascii_letters) for _ in range(length if length is not None else 10))}"'
-    
 
     # handle time
     # returns current time
     #
     # example
     # <%time%> -> returns current time as string
+
     def __next_time(self) -> str:
         return f'"{str(datetime.now().time())}"'
