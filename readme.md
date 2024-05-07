@@ -26,7 +26,7 @@ After cloning the repo, before running the app you need to install required pack
 
 - Once environment is activated, install required packages
     ```
-    python3 install -r requirements.txt
+    pip install -r requirements.txt
     ```
 - Run the app using
     ```
