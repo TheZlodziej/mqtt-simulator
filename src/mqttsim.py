@@ -17,16 +17,25 @@ class MqttSimConfig:
     def get_topic_data(self, topic_uuid: str) -> dict | None:
         return self.__config.get(f"topics.{topic_uuid}")
 
-    def put_broker(self, host: str, port: int) -> None:
+    def put_broker(self, host: str, port: int, username: str | None = None, password: str | None = None) -> None:
         self.__config.put("broker.host", host)
         self.__config.put("broker.port", port)
+        if username is not None:
+            self.__config.put("broker.username", username)
+        if password is not None:
+            self.__config.put("broker.password", password)
 
-    def get_broker(self) -> tuple[str, int]:
+    def get_broker(self) -> tuple[str, int, str, str]:
         broker_info = self.__config.get("broker")
         if broker_info is None:
-            self.__config.put("broker", {"host": "localhost", "port": 1883})
+            self.__config.put("broker", { "host": "localhost", "port": 1883 })
             return self.get_broker()
-        return broker_info.get("host", "localhost"), broker_info.get("port", 1883)
+        return (
+            broker_info.get("host", "localhost"),
+            broker_info.get("port", 1883),
+            broker_info.get("username", ""),
+            broker_info.get("password", "")
+        )
 
     def get_topics(self) -> dict:
         topics = self.__config.get("topics")
@@ -114,13 +123,14 @@ class MqttSim:
 
     # connects to broker and starts client loop
     def connect_to_broker(self) -> bool:
-        host, port = self.__config.get_broker()
+        host, port, username, password = self.__config.get_broker()
         self.__logger.info(f"Trying to connect to broker {host}:{port}...")
         try:
-            self.__client.connect(host, port)  # TODO: connect_async ?
+            self.__client.connect(host, port)
+            self.__client.username_pw_set(username, password)
             self.__client.loop_start()
         except ConnectionError:
-            self.__logger.error(f"Coulnd't connect to broker {host}:{port}.")
+            self.__logger.error(f"Couldn't connect to broker {host}:{port}.")
             return False
         except Exception:
             self.__logger.error(

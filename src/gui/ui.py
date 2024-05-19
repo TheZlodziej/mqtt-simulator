@@ -304,7 +304,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
 
     def __set_values_from_config(self) -> None:
         def set_values_from_config_broker() -> None:
-            hostname, port = self.__config.get_broker()
+            hostname, port, *_ = self.__config.get_broker()
             self.broker_hostname.setText(hostname)
             self.broker_port.setValue(port)
 
