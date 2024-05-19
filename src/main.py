@@ -15,7 +15,12 @@ def main(args: Namespace):
     # standalone functions (cmd line config edit)
     if args.add_topic:
         topic, format, interval = args.add_topic
-        topic_config = {"interval": interval, "format": format, "manual": False}
+        topic_config = {
+            "topic": topic,
+            "format": format,
+            "interval": interval,
+            "manual": False
+        }
         config.put_topic(topic, topic_config)
         return
 

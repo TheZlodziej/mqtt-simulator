@@ -4,24 +4,18 @@ from threading import Thread
 from datetime import datetime
 from time import sleep
 from mqttsimdatagenerator import MqttSimDataGenerator
-
+from uuid import uuid4
 
 class MqttSimConfig:
     def __init__(self, path: str):
         self.__config = ConfigHandler(path)
 
-    def put_topic(
-        self, topic: str, data_format: str, interval: float = 1.5, manual: bool = False
-    ) -> None:
-        self.__config.put(f"topics.{topic}.data_format", data_format)
-        self.__config.put(f"topics.{topic}.interval", interval)
-        self.__config.put(f"topics.{topic}.manual", manual)
+    def put_topic(self, topic_config: dict, uuid: str = uuid4()) -> None:
+        self.__config.put(f"topics.{uuid}", topic_config)
+        return uuid
 
-    def put_topic(self, topic: str, topic_config: dict[str, str]) -> None:
-        self.__config.put(f"topics.{topic}", topic_config)
-
-    def get_topic_data(self, topic: str) -> dict | None:
-        return self.__config.get(f"topics.{topic}")
+    def get_topic_data(self, topic_uuid: str) -> dict | None:
+        return self.__config.get(f"topics.{topic_uuid}")
 
     def put_broker(self, host: str, port: int) -> None:
         self.__config.put("broker.host", host)
@@ -41,8 +35,8 @@ class MqttSimConfig:
             return self.get_topics()
         return topics
 
-    def remove_topic(self, topic: str) -> None:
-        self.__config.remove(f"topics.{topic}")
+    def remove_topic(self, topic_uuid: str) -> None:
+        self.__config.remove(f"topics.{topic_uuid}")
 
 
 class MqttSim:
@@ -50,8 +44,8 @@ class MqttSim:
         self.__logger = logger
         self.__config = config
         self.__topic_data_generators = {
-            topic_name: MqttSimDataGenerator(topic_config.get("data_format"))
-            for topic_name, topic_config in self.__config.get_topics().items()
+            topic_uuid: MqttSimDataGenerator(topic_config.get("data_format"))
+            for topic_uuid, topic_config in self.__config.get_topics().items()
         }
         self.__setup_client()
         self.__setup_publishing_thread()
@@ -65,23 +59,23 @@ class MqttSim:
             diff_dt = time1 - time2
             return diff_dt.total_seconds()
 
-        topics = self.__config.get_topics()
-        last_sent = {topic: datetime.now() for topic in topics.keys()}
+        topics_data = self.__config.get_topics()
+        last_sent = {topic_uuid: datetime.now() for topic_uuid in topics_data.keys()}
 
         while not self.__should_stop_publishing_thread:
             if not self.is_connected_to_broker():
                 sleep(0.5)
                 continue
             now = datetime.now()
-            for topic, config in topics.items():
-                if topic not in last_sent:
-                    last_sent[topic] = now
+            for topic_uuid, topic_config in topics_data.items():
+                if topic_uuid not in last_sent:
+                    last_sent[topic_uuid] = now
                     continue
-                if config.get("manual"):
+                if topic_config.get("manual"):
                     continue
-                if time_diff_in_seconds(now, last_sent[topic]) > config.get("interval"):
-                    self.send_single_message(topic)
-                    last_sent[topic] = now
+                if time_diff_in_seconds(now, last_sent[topic_uuid]) > topic_config.get("interval"):
+                    self.send_single_message(topic_uuid)
+                    last_sent[topic_uuid] = now
             sleep(0.01)
 
     def __setup_client(self) -> None:
@@ -146,20 +140,22 @@ class MqttSim:
 
     # Removes topic from config (and saves it into config file).
     # If publishing thread was already started, it will take the topic into account.
-    def remove_topic(self, topic: str) -> None:
-        self.__client.unsubscribe(topic)
-        self.__config.remove_topic(topic)
-        self.__logger.info(f"Removed topic: {topic}.")
-        del self.__topic_data_generators[topic]
+    def remove_topic(self, topic_uuid: str) -> None:
+        topic_data = self.__config.get_topic_data(topic_uuid)
+        self.__client.unsubscribe(topic_data.get("topic"))
+        self.__config.remove_topic(topic_uuid)
+        self.__logger.info(f"Removed topic: {topic_data.get("topic")}) [uuid={topic_uuid}].")
+        del self.__topic_data_generators[topic_uuid]
 
     # Adds topic to config (and saves it into config file).
     # If publishing thread was already started, it will take the topic into account.
-    def add_topic(self, topic: str, topic_config: dict) -> None:
-        self.__config.put_topic(topic, topic_config)
-        self.__logger.info(f"Added topic: {topic}.")
-        self.__topic_data_generators[topic] = MqttSimDataGenerator(
+    def add_topic(self, topic_config: dict) -> str:
+        uuid = self.__config.put_topic(topic_config)
+        self.__logger.info(f"Added topic: {topic_config.get("topic")} [uuid={uuid}].")
+        self.__topic_data_generators[uuid] = MqttSimDataGenerator(
             topic_config.get("data_format")
         )
+        return uuid
 
     def get_logger(self) -> any:
         return self.__logger
@@ -167,17 +163,17 @@ class MqttSim:
     def get_config(self) -> MqttSimConfig:
         return self.__config
 
-    def edit(self, topic_name, new_data) -> None:
-        self.__config.put_topic(topic_name, new_data)
-        self.__topic_data_generators[topic_name].reinitalize(
+    def edit(self, topic_uuid, new_data) -> None:
+        self.__config.put_topic(new_data, uuid=topic_uuid)
+        self.__topic_data_generators[topic_uuid].reinitalize(
             new_data.get("data_format")
         )
 
-    def send_single_message(self, topic_name) -> None:
+    def send_single_message(self, topic_uuid) -> None:
         if not self.is_connected_to_broker():
             self.__logger.error("Trying to send message when not connected to broker.")
             return
-
-        self.__logger.info(f"Publishing data on {topic_name}...")
-        message = self.__topic_data_generators.get(topic_name).next_message()
-        self.__client.publish(topic_name, message)
+        topic_data = self.__config.get_topic_data(topic_uuid)
+        self.__logger.info(f"Publishing data on {topic_data.get("topic")} [uuid={topic_uuid}]...")
+        message = self.__topic_data_generators.get(topic_uuid).next_message()
+        self.__client.publish(topic_data.get("topic"), message)
