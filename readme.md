@@ -86,7 +86,7 @@ Our <b>Data format</b> would then be
 ```
 
 ### Manual setup of config file
-You can always create ```config.json``` file yourself if you think writing it with the command line tool is too tedious - simply follow the format below
+You can always create ```config.json``` file yourself if you think writing it with the command line tool is too tedious - simply follow the format below (uuid is treated as ```str``` not uuid type, so you can use whatever unique string you want).
 ```json
 {
     "broker": { 
@@ -94,12 +94,14 @@ You can always create ```config.json``` file yourself if you think writing it wi
         "port": 1883
     },
     "topics": {
-        "topic1": {
+        "5b8cf095-c3c6-4730-8618-80811f4506ab": {
+            "topic": "topic1"
             "data_format": "<%randi%>",
             "interval": 1,
             "manual": false
         },
-        "test/topic2": {
+        "my-app-unique-id": {
+            "topic": "test/topic2",
             "data_format": "{ \"x\": \"<%randu%>\" }",
             "interval": 1.5,
             "manual": false
