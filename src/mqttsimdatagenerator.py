@@ -4,7 +4,7 @@ from re import findall, search
 from uuid import uuid1 as uuid
 from functools import partial
 from datetime import datetime
-
+from copy import copy
 
 class MqttSimDataGenerator:
     def __init__(self, data_format: str):
@@ -19,6 +19,10 @@ class MqttSimDataGenerator:
     def reinitalize(self, data_format):
         if hasattr(self, "__file_data"):
             delattr(self, "__file_data")
+
+        if hasattr(self, "__inc_data"):
+            delattr(self, "__inc_data")
+            
         self.__make_formatted_string(data_format)
 
     def __make_formatted_string(self, data_format):
@@ -35,6 +39,7 @@ class MqttSimDataGenerator:
             "rands": self.__init_rands,
             "file": self.__init_file,
             "time": self.__init_time,
+            "inc": self.__init_inc, 
         }
 
         # replacement functions found
@@ -85,7 +90,23 @@ class MqttSimDataGenerator:
         separator_value = (
             separator_match.group(1) if separator_match is not None else dflt[1]
         )
-        return (src_value, separator_value)
+        return (src_value, separator_value) 
+
+    def __extract_start_inc_reset(self, args: str) -> tuple[int, int, int | None]:
+        def int_or_float(s: str) -> int | float:
+            if s.isdigit():
+                return int(s)
+            else:
+                return float(s) 
+            
+        start_match = search(r"start=(-?\d+(?:\.\d+)?)", args)
+        inc_match = search(r"inc=(-?\d+(?:\.\d+)?)", args)
+        reset_match = search(r"reset=(-?\d+(?:\.\d+)?)", args)
+         
+        start_val = int_or_float(start_match.group(1)) if start_match is not None else 0
+        inc_val = int_or_float(inc_match.group(1)) if inc_match is not None else 1
+        reset = int_or_float(reset_match.group(1)) if reset_match is not None else None
+        return (start_val, inc_val, reset)
 
     def __init_file(self, id: str, args: str) -> None:
         if not hasattr(self, "__file_data"):
@@ -129,6 +150,14 @@ class MqttSimDataGenerator:
 
     def __init_time(self, id: str, args: str) -> None:
         self.__replace_dict[id] = self.__next_time
+
+    def __init_inc(self, id: str, args: str) -> None:
+        if not hasattr(self, "__inc_data"):
+            self.__inc_data = dict()
+
+        start_val, inc, reset_val = self.__extract_start_inc_reset(args)
+        self.__inc_data[id] = start_val
+        self.__replace_dict[id] = partial(self.__next_inc, id, start_val, inc, reset_val)
 
     # handle randf
     # returns random float from given range (default = [0; 1]
@@ -196,3 +225,17 @@ class MqttSimDataGenerator:
     # <%time%> -> returns current time as string
     def __next_time(self) -> str:
         return f'"{str(datetime.now().time())}"'
+    
+    # handle inc
+    # returns incremented value
+    #
+    # example
+    # <%inc%> -> returns values 0, 1, 2, ...
+    # <%inc start=1 inc=5%> -> returns values 1, 6, 11, ...
+    # <%inc min=0 reset=5%> -> returns values 1, 2, 3, 4, 5, 1, 2, ...
+    def __next_inc(self, id: str, start: int | float, inc: int | float, reset: int | float | None) -> None:
+        curr_val = self.__inc_data[id]
+        self.__inc_data[id] += inc
+        if reset is not None and self.__inc_data[id] > reset:
+            self.__inc_data[id] = start
+        return curr_val

@@ -71,6 +71,44 @@ class TestMqttSimDataGenerator(unittest.TestCase):
         self.assertEqual(generator.next_message(), '"{\n    message: "hello world"\n}"')
         self.assertEqual(generator.next_message(), '"{\n    message: "hello world"\n}"')
 
+    def test_inc_start_int(self):
+        generator = MqttSimDataGenerator('<%inc start=1%>')
+        self.assertEqual(generator.next_message(), '1')
+        self.assertEqual(generator.next_message(), '2')
+        self.assertEqual(generator.next_message(), '3')
+
+    def test_inc_inc_int(self):
+        generator = MqttSimDataGenerator('<%inc inc=2%>')
+        self.assertEqual(generator.next_message(), '0')
+        self.assertEqual(generator.next_message(), '2')
+        self.assertEqual(generator.next_message(), '4')
+    
+    def test_inc_reset_int(self):
+        generator = MqttSimDataGenerator('<%inc reset=2%>')
+        self.assertEqual(generator.next_message(), '0')
+        self.assertEqual(generator.next_message(), '1')
+        self.assertEqual(generator.next_message(), '2')
+        self.assertEqual(generator.next_message(), '0')
+
+    def test_inc_start_float(self):
+        generator = MqttSimDataGenerator('<%inc start=1.5%>')
+        self.assertEqual(generator.next_message(), '1.5')
+        self.assertEqual(generator.next_message(), '2.5')
+        self.assertEqual(generator.next_message(), '3.5')
+
+    def test_inc_inc_float(self):
+        generator = MqttSimDataGenerator('<%inc inc=0.5%>')
+        self.assertEqual(generator.next_message(), '0')
+        self.assertEqual(generator.next_message(), '0.5')
+        self.assertEqual(generator.next_message(), '1.0')
+    
+    def test_inc_reset_float(self):
+        generator = MqttSimDataGenerator('<%inc inc=0.5 reset=1.5%>')
+        self.assertEqual(generator.next_message(), '0')
+        self.assertEqual(generator.next_message(), '0.5')
+        self.assertEqual(generator.next_message(), '1.0')
+        self.assertEqual(generator.next_message(), '1.5')
+        self.assertEqual(generator.next_message(), '0')
 
 if __name__ == "__main__":
     unittest.main()
