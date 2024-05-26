@@ -8,7 +8,7 @@ from copy import copy
 
 class MqttSimDataGenerator:
     def __init__(self, data_format: str):
-        self.__make_formatted_string(data_format)
+        self.reinitalize(data_format)
 
     def next_message(self):
         message = self.__format_str
@@ -17,12 +17,8 @@ class MqttSimDataGenerator:
         return message
 
     def reinitalize(self, data_format):
-        if hasattr(self, "__file_data"):
-            delattr(self, "__file_data")
-
-        if hasattr(self, "__inc_data"):
-            delattr(self, "__inc_data")
-            
+        self.__file_data = dict()
+        self.__inc_data = dict()
         self.__make_formatted_string(data_format)
 
     def __make_formatted_string(self, data_format):
@@ -109,9 +105,6 @@ class MqttSimDataGenerator:
         return (start_val, inc_val, reset)
 
     def __init_file(self, id: str, args: str) -> None:
-        if not hasattr(self, "__file_data"):
-            self.__file_data = dict()
-
         splitted_file_content = ["no file source"]
         src_val, separator_val = self.__extract_src_and_separator_or_default(
             args, (None, None)
@@ -152,9 +145,6 @@ class MqttSimDataGenerator:
         self.__replace_dict[id] = self.__next_time
 
     def __init_inc(self, id: str, args: str) -> None:
-        if not hasattr(self, "__inc_data"):
-            self.__inc_data = dict()
-
         start_val, inc, reset_val = self.__extract_start_inc_reset(args)
         self.__inc_data[id] = start_val
         self.__replace_dict[id] = partial(self.__next_inc, id, start_val, inc, reset_val)
