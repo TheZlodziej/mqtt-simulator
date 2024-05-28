@@ -26,7 +26,8 @@ class MqttSimTopicToolButton(QToolButton):
         super(MqttSimTopicToolButton, self).__init__()
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setIcon(QIcon(icon))
-        self.setToolTip(QCoreApplication.translate("MainWindow", tooltip, None))
+        self.setToolTip(QCoreApplication.translate(
+            "MainWindow", tooltip, None))
 
 
 class MqttSimAddTopicWindow(Ui_AddTopicDialog, QDialog):
@@ -34,12 +35,14 @@ class MqttSimAddTopicWindow(Ui_AddTopicDialog, QDialog):
         super(MqttSimAddTopicWindow, self).__init__()
         self.setupUi(self)
         self.setWindowIcon(QIcon(":/icons/mqtt.svg"))
-        self.load_from_file_btn.clicked.connect(self.__on_load_from_file_btn_clicked)
+        self.load_from_file_btn.clicked.connect(
+            self.__on_load_from_file_btn_clicked)
         self.__load_patterns()
         self.predefined_pattern_combo_box.currentIndexChanged.connect(
             self.__on_pattern_selected
         )
-        self.save_as_pattern_btn.clicked.connect(self.__on_save_as_pattern_btn_clicked)
+        self.save_as_pattern_btn.clicked.connect(
+            self.__on_save_as_pattern_btn_clicked)
 
     def __on_load_from_file_btn_clicked(self) -> None:
         filename, _ = QFileDialog.getOpenFileName(
@@ -89,7 +92,8 @@ class MqttSimAddTopicWindow(Ui_AddTopicDialog, QDialog):
                     path.basename(pattern_filename).replace("_", " ")
                 )[0]
                 pattern_value = file.read()
-                self.predefined_pattern_combo_box.addItem(pattern_name, pattern_value)
+                self.predefined_pattern_combo_box.addItem(
+                    pattern_name, pattern_value)
 
     def __on_save_as_pattern_btn_clicked(self):
         pattern_name, accepted = QInputDialog.getText(
@@ -164,7 +168,8 @@ class MqttSimTopicWidget(QWidget):
 
         # edit btn
         self.edit_btn = MqttSimTopicToolButton(
-            ":/icons/edit.svg", QCoreApplication.translate("MainWindow", "Edit", None)
+            ":/icons/edit.svg", QCoreApplication.translate(
+                "MainWindow", "Edit", None)
         )
         self.edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         hlayout.addWidget(self.edit_btn)
@@ -179,6 +184,7 @@ class MqttSimTopicWidget(QWidget):
     def set_topic_name(self, new_topic_name: str) -> None:
         self.topic = new_topic_name
         self.topic_lbl.setText(new_topic_name)
+
 
 class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
     def __init__(self, sim: MqttSim):
@@ -207,12 +213,14 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                     QCoreApplication.translate("MainWindow", "Connect", None)
                 )
                 self.broker_connect_btn.setToolTip(
-                    QCoreApplication.translate("MainWindow", "Connect to broker", None)
+                    QCoreApplication.translate(
+                        "MainWindow", "Connect to broker", None)
                 )
             else:
                 if self.__sim.connect_to_broker():
                     self.broker_connect_btn.setText(
-                        QCoreApplication.translate("MainWindow", "Disconnect", None)
+                        QCoreApplication.translate(
+                            "MainWindow", "Disconnect", None)
                     )
                     self.broker_connect_btn.setToolTip(
                         QCoreApplication.translate(
@@ -227,7 +235,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         def on_add_topic_btn_clicked() -> None:
             def validate_input(topic_config) -> bool:
                 return len(topic_config.get("topic")) > 0
-                
+
             add_topic_window = MqttSimAddTopicWindow()
             while True:
                 if add_topic_window.exec() == QDialog.Accepted:
@@ -247,7 +255,8 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                     break  # Break out of the loop if dialog is cancelled
 
         def on_broker_info_changed() -> None:
-            self.__sim.set_broker(self.broker_hostname.text(), self.broker_port.value())
+            self.__sim.set_broker(
+                self.broker_hostname.text(), self.broker_port.value())
 
         def on_topic_search_text_changed() -> None:
             for widget in self.topics_list_widget.findChildren(MqttSimTopicWidget):
@@ -261,7 +270,8 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
         self.add_topic_btn.clicked.connect(on_add_topic_btn_clicked)
         self.broker_hostname.textChanged.connect(on_broker_info_changed)
         self.broker_port.valueChanged.connect(on_broker_info_changed)
-        self.topic_search_line_edit.textChanged.connect(on_topic_search_text_changed)
+        self.topic_search_line_edit.textChanged.connect(
+            on_topic_search_text_changed)
 
     def __add_topic_to_item_list(self, topic_uuid: str) -> None:
         topic_name = self.__config.get_topic_data(topic_uuid).get("topic")
@@ -271,7 +281,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
             result = QMessageBox.question(
                 self,
                 "Remove topic?",
-                f"Are you sure you want to remove topic {self.__config.get_topic_data(topic_uuid).get("topic")} [uuid={topic_uuid}]?",
+                f'Are you sure you want to remove topic {self.__config.get_topic_data(topic_uuid).get("topic")} [uuid={topic_uuid}]?',
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if result == QMessageBox.StandardButton.Yes:
                 self.__sim.remove_topic(topic_uuid)
@@ -291,7 +301,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                     topic_widget.set_topic_name(edited_data.get("topic"))
                     self.__sim.edit(topic_uuid, edited_data)
                     self.__logger.info(
-                        f"Edited topic {data.get("topic")} [uuid={topic_uuid}] ({data} -> {edited_data})."
+                        f'Edited topic {data.get("topic")} [uuid={topic_uuid}] ({data} -> {edited_data}).'
                     )
 
         topic_widget.remove_btn.clicked.connect(on_remove_btn_clicked)

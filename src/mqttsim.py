@@ -6,6 +6,7 @@ from time import sleep
 from mqttsimdatagenerator import MqttSimDataGenerator
 from uuid import uuid4
 
+
 class MqttSimConfig:
     def __init__(self, path: str):
         self.__config = ConfigHandler(path)
@@ -28,7 +29,7 @@ class MqttSimConfig:
     def get_broker(self) -> tuple[str, int, str, str]:
         broker_info = self.__config.get("broker")
         if broker_info is None:
-            self.__config.put("broker", { "host": "localhost", "port": 1883 })
+            self.__config.put("broker", {"host": "localhost", "port": 1883})
             return self.get_broker()
         return (
             broker_info.get("host", "localhost"),
@@ -69,7 +70,8 @@ class MqttSim:
             return diff_dt.total_seconds()
 
         topics_data = self.__config.get_topics()
-        last_sent = {topic_uuid: datetime.now() for topic_uuid in topics_data.keys()}
+        last_sent = {topic_uuid: datetime.now()
+                     for topic_uuid in topics_data.keys()}
 
         while not self.__should_stop_publishing_thread:
             if not self.is_connected_to_broker():
@@ -95,7 +97,8 @@ class MqttSim:
             if rc == CONNACK_ACCEPTED:
                 self.__logger.info("Connected to broker.")
             else:
-                self.__logger.error(f"Error when connecting to broker (rc={rc}).")
+                self.__logger.error(
+                    f"Error when connecting to broker (rc={rc}).")
 
         def on_disconnect(client, userdata, rc) -> None:
             if rc == 0:
@@ -154,14 +157,16 @@ class MqttSim:
         topic_data = self.__config.get_topic_data(topic_uuid)
         self.__client.unsubscribe(topic_data.get("topic"))
         self.__config.remove_topic(topic_uuid)
-        self.__logger.info(f"Removed topic: {topic_data.get("topic")}) [uuid={topic_uuid}].")
+        self.__logger.info(
+            f'Removed topic: {topic_data.get("topic")} [uuid={topic_uuid}].')
         del self.__topic_data_generators[topic_uuid]
 
     # Adds topic to config (and saves it into config file).
     # If publishing thread was already started, it will take the topic into account.
     def add_topic(self, topic_config: dict) -> str:
         uuid = self.__config.put_topic(topic_config)
-        self.__logger.info(f"Added topic: {topic_config.get("topic")} [uuid={uuid}].")
+        self.__logger.info(
+            f'Added topic: {topic_config.get("topic")} [uuid={uuid}].')
         self.__topic_data_generators[uuid] = MqttSimDataGenerator(
             topic_config.get("data_format")
         )
@@ -181,9 +186,11 @@ class MqttSim:
 
     def send_single_message(self, topic_uuid) -> None:
         if not self.is_connected_to_broker():
-            self.__logger.error("Trying to send message when not connected to broker.")
+            self.__logger.error(
+                "Trying to send message when not connected to broker.")
             return
         topic_data = self.__config.get_topic_data(topic_uuid)
-        self.__logger.info(f"Publishing data on {topic_data.get("topic")} [uuid={topic_uuid}]...")
+        self.__logger.info(
+            f'Publishing data on {topic_data.get("topic")} [uuid={topic_uuid}]...')
         message = self.__topic_data_generators.get(topic_uuid).next_message()
         self.__client.publish(topic_data.get("topic"), message)
