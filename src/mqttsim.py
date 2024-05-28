@@ -100,18 +100,13 @@ class MqttSim:
 
     def __setup_client(self) -> None:
         def on_message(client, userdata, message) -> None:
-            if message.topic in self.__topic_data_generators:
-                self.__logger.info(
-                    f"Received message from broker {message.topic}: '{message.payload}'.")
-            elif message.topic in self.__proto_topic_data_generators:
-                message_constructor = self.__proto_topic_data_generators[
-                    message.topic].message_constructor
-                proto_message = message_constructor()
-                proto_message.ParseFromString(message.payload)
-                self.__logger.info(
-                    f"Received message from broker on topic {message.topic}: '{proto_message}'.")
+            self.__logger.info(
+                f"Received message from broker {message.topic}.")
 
         def on_connect(client, userdata, flags, rc) -> None:
+            topics = self.__config.get_topics()
+            for topic_uuid in topics:
+                self.__client.subscribe(topics[topic_uuid]["topic"])
             if rc == CONNACK_ACCEPTED:
                 self.__logger.info("Connected to broker.")
             else:
@@ -216,8 +211,8 @@ class MqttSim:
             self.__logger.error(
                 "Trying to send message when not connected to broker.")
             return
+        topic_data = self.__config.get_topic_data(topic_uuid)
         if topic_uuid in self.__topic_data_generators:
-            topic_data = self.__config.get_topic_data(topic_uuid)
             self.__logger.info(
                 f'Publishing data on {topic_data.get("topic")} [uuid={topic_uuid}]...')
             message = self.__topic_data_generators.get(
@@ -230,3 +225,12 @@ class MqttSim:
             proto_message = gen.get_next_message()
             self.__client.publish(
                 topic_data.get("topic"), proto_message.SerializeToString())
+
+    def add_proto_topic(self, topic_config: dict) -> None:
+        uuid = self.__config.put_topic(topic_config)
+        self.__logger.info(
+            f'Added topic: {topic_config.get("topic")} [uuid={uuid}].')
+        self.__proto_topic_data_generators[uuid] = MqttProtoGenerator(
+            topic_config.get("message"), topic_config.get("file"))
+        self.__client.subscribe(topic_config.get("topic"))
+        return uuid

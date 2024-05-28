@@ -125,3 +125,32 @@ Main window
   <br>
 Add topic window
 </p>
+
+# Protobuf
+To use protobuf place compiled message files in src/protofiles.
+
+## Custom message content
+
+To send a message with custom contents use *.csv file. Program will look for specified file in root directory.
+
+### Example:
+
+Given these protobuf messages:
+```protobuf
+message Message1 {
+    int32 my_int = 1;
+    Message2 nested_message = 2;
+}
+message Message2 {
+    int32 my_int = 1;
+}
+```
+
+example csv file for Message1 would look like this:
+
+```csv
+my_int,Message2.my_int
+123,456
+456,1312
+123123,45123
+```

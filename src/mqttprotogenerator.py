@@ -6,6 +6,7 @@ import random
 import string
 import pandas as pd
 import sys
+import os
 
 
 class MqttProtoGenerator():
@@ -15,7 +16,17 @@ class MqttProtoGenerator():
         self.message_constructors = MqttProtoGenerator.get_message_constructors()
         self.message_constructor = self.message_constructors[message_name]
         self.constructed_messages = None
+        self.message_name = message_name
         if message_file_path != '':
+            try:
+                self.file_time_stamp = os.stat(message_file_path).st_mtime
+            except FileNotFoundError:
+                MqttProtoGenerator.logger.error(
+                    f"ERROR: File {message_file_path} not found. Defaulting to sending random messages")
+                self.message_file_path = ''
+                return
+
+            self.message_file_path = message_file_path
             self.constructed_messages = self.read_message_csv(
                 message_name, message_file_path)
             self.curr_message = 0
@@ -66,6 +77,15 @@ class MqttProtoGenerator():
     def get_next_message(self):
         ret = None
         if self.constructed_messages is not None:
+            time_stamp = os.stat(self.message_file_path).st_mtime
+            if time_stamp != self.file_time_stamp:
+                MqttProtoGenerator.logger.info(
+                    f"INFO: file {self.message_file_path} changed. Reconstructing messages")
+                self.constructed_messages = self.read_message_csv(
+                    self.message_name, message_file=self.message_file_path)
+                self.file_time_stamp = time_stamp
+                self.curr_message = 0
+
             ret = self.constructed_messages[self.curr_message]
             self.curr_message = (self.curr_message +
                                  1) % len(self.constructed_messages)
@@ -102,8 +122,17 @@ class MqttProtoGenerator():
                     if message_type.name not in field:
                         continue
                     sub_fields = field.split('.')
-                    new_field_name = sub_fields[sub_fields.index(
-                        message_type.name)+1:]
+                    try:
+                        new_field_name = sub_fields[sub_fields.index(
+                            message_type.name)+1:]
+                    except ValueError:
+                        if ' ' in field:
+                            MqttProtoGenerator.logger.error(
+                                f"ERROR: Field {field} contains spaces!!! You should not do that!")
+                        else:
+                            MqttProtoGenerator.logger.error(
+                                f"ERROR: Field with key \'{field}\' not found in message \'{message_name}\'.")
+                            return new_message
                     passed_on_fields['.'.join(
                         new_field_name)] = fields[field]
                 m = self.construct_message(message_type.name, passed_on_fields)
@@ -112,8 +141,8 @@ class MqttProtoGenerator():
                 continue
             field_type = field_descriptor.type
             if field_descriptor.name not in fields.keys():
-                MqttProtoGenerator.logger.error(
-                    f"ERROR: data for field \'{field_descriptor.name}\' not found when constructing message \'{message_name}\'.")
+                MqttProtoGenerator.logger.info(
+                    f"INFO: data for field \'{field_descriptor.name}\' not found when constructing message \'{message_name}\'.")
                 continue
             # bolean
             if field_type == 8:
