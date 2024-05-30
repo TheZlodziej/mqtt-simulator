@@ -112,20 +112,6 @@ You can always create ```config.json``` file yourself if you think writing it wi
 ```
 > result - app publishes random int value on 'topic1' every second and random uint value on 'test/topic2'
 
-## Screenshots
-Keep in mind that the look of the app is dependent on user's system - QT uses native components.
-<p align="center">
-  <img src="./images/app.png">
-  <br>
-Main window
-</p>
-
-<p align="center">
-  <img src="./images/add.png">
-  <br>
-Add topic window
-</p>
-
 # Protobuf
 To use protobuf place compiled message files in src/protofiles.
 
@@ -154,3 +140,18 @@ my_int,Message2.my_int
 456,1312
 123123,45123
 ```
+
+## Screenshots
+Keep in mind that the look of the app is dependent on user's system - QT uses native components.
+<p align="center">
+  <img src="./images/app.png">
+  <br>
+Main window
+</p>
+
+<p align="center">
+  <img src="./images/add.png">
+  <br>
+Add topic window
+</p>
+

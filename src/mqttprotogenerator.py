@@ -2,24 +2,23 @@ from pkgutil import iter_modules
 import protofiles
 import importlib
 from google.protobuf.message import Message
-import random
-import string
+from random import getrandbits, randint, random, choice, randbytes
+from string import ascii_lowercase
 import pandas as pd
-import sys
-import os
+from os import stat
 
 
 class MqttProtoGenerator():
     logger = None
 
-    def __init__(self, message_name: string, message_file_path=''):
+    def __init__(self, message_name: str, message_file_path=''):
         self.message_constructors = MqttProtoGenerator.get_message_constructors()
         self.message_constructor = self.message_constructors[message_name]
         self.constructed_messages = None
         self.message_name = message_name
         if message_file_path != '':
             try:
-                self.file_time_stamp = os.stat(message_file_path).st_mtime
+                self.file_time_stamp = stat(message_file_path).st_mtime
             except FileNotFoundError:
                 MqttProtoGenerator.logger.error(
                     f"ERROR: File {message_file_path} not found. Defaulting to sending random messages")
@@ -57,27 +56,27 @@ class MqttProtoGenerator():
             field_type = field_descriptor.type
             # boolean
             if field_type == 8:
-                setattr(message, field_descriptor.name, random.getrandbits(1))
+                setattr(message, field_descriptor.name, getrandbits(1))
             # string
             elif field_type == 9:
                 setattr(message, field_descriptor.name, ''.join(
-                    random.choice(string.ascii_lowercase) for i in range(10)))
+                    choice(ascii_lowercase) for i in range(10)))
             # float or double
             elif field_type == 2 or field_type == 1:
-                setattr(message, field_descriptor.name, random.random())
+                setattr(message, field_descriptor.name, random())
             # bytes
             elif field_type == 12:
-                setattr(message, field_descriptor.name, random.randbytes(10))
+                setattr(message, field_descriptor.name, randbytes(10))
             # int
             else:
                 setattr(message, field_descriptor.name,
-                        random.randint(0, 1000))
+                        randint(0, 1000))
         return message
 
     def get_next_message(self):
         ret = None
         if self.constructed_messages is not None:
-            time_stamp = os.stat(self.message_file_path).st_mtime
+            time_stamp = stat(self.message_file_path).st_mtime
             if time_stamp != self.file_time_stamp:
                 MqttProtoGenerator.logger.info(
                     f"INFO: file {self.message_file_path} changed. Reconstructing messages")
