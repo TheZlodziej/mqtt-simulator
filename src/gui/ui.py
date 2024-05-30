@@ -19,6 +19,9 @@ from functools import partial
 from logger import QListWidgetLogHandler
 from os import listdir, path, getcwd
 import icons.generated.icons
+from gui.generated.addprototopicdialog import Ui_AddProtoTopicDialog
+from gui.generated.choosetopicdialog import Ui_ChooseTopicDialog
+from mqttprotogenerator import MqttProtoGenerator
 
 
 class MqttSimTopicToolButton(QToolButton):
@@ -39,7 +42,8 @@ class MqttSimAddTopicWindow(Ui_AddTopicDialog, QDialog):
         self.predefined_pattern_combo_box.currentIndexChanged.connect(
             self.__on_pattern_selected
         )
-        self.save_as_pattern_btn.clicked.connect(self.__on_save_as_pattern_btn_clicked)
+        self.save_as_pattern_btn.clicked.connect(
+            self.__on_save_as_pattern_btn_clicked)
 
     def __on_load_from_file_btn_clicked(self) -> None:
         filename, _ = QFileDialog.getOpenFileName(
@@ -180,6 +184,42 @@ class MqttSimTopicWidget(QWidget):
         self.topic = new_topic_name
         self.topic_lbl.setText(new_topic_name)
 
+
+class MqttSimAddProtoTopicWindow(Ui_AddProtoTopicDialog, QDialog):
+    def __init__(self):
+        super(MqttSimAddProtoTopicWindow, self).__init__()
+        self.setupUi(self)
+        self.setWindowIcon(QIcon(":/icons/mqtt.svg"))
+
+
+class MqttSimEditProtoTopicWindow(MqttSimAddProtoTopicWindow, QDialog):
+    def __init__(self, topic_name: str, topic_data: dict):
+        super(MqttSimEditProtoTopicWindow, self).__init__()
+        self.__set_topic_values(topic_name, topic_data)
+        self.setWindowIcon(QIcon(":/icons/mqtt.svg"))
+
+    def __set_topic_values(self, topic_name, topic_data) -> None:
+        messages = MqttProtoGenerator.get_message_constructors()
+        current_item = None
+        for message_name in messages.keys():
+            new_item = QListWidgetItem(message_name)
+            self.message_list.addItem(new_item)
+            if message_name == topic_data["message"]:
+                current_item = new_item
+        self.message_list.setCurrentItem(current_item)
+        self.name_line_edit.setText(topic_name)
+        self.file_line_edit.setText(topic_data["file"])
+        self.interval_spin_box.setValue(topic_data.get("interval"))
+        self.manual_check_box.setChecked(topic_data.get("manual"))
+
+
+class MqttSimChooseTopicWindow(Ui_ChooseTopicDialog, QDialog):
+    def __init__(self):
+        super(MqttSimChooseTopicWindow, self).__init__()
+        self.setupUi(self)
+        self.setWindowIcon(QIcon(":/icons/mqtt.svg"))
+
+
 class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
     def __init__(self, sim: MqttSim):
         super(MqttSimMainWindow, self).__init__()
@@ -212,12 +252,12 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
             else:
                 if self.__sim.connect_to_broker():
                     self.broker_connect_btn.setText(
-                        QCoreApplication.translate("MainWindow", "Disconnect", None)
+                        QCoreApplication.translate(
+                            "MainWindow", "Disconnect", None)
                     )
                     self.broker_connect_btn.setToolTip(
                         QCoreApplication.translate(
-                            "MainWindow", "Disconnect from broker", None
-                        )
+                            "MainWindow", "Disconnect from broker", None)
                     )
 
         def on_clear_logs_btn_clicked() -> None:
@@ -225,9 +265,21 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
             self.__logger.info("Cleared logs.")
 
         def on_add_topic_btn_clicked() -> None:
+            choose_topic_window = MqttSimChooseTopicWindow()
+            choose_topic_window.choose_json_button.clicked.connect(
+                choose_topic_window.close)
+            choose_topic_window.choose_json_button.clicked.connect(
+                on_add_json_btn_clicked)
+            choose_topic_window.choose_proto_button.clicked.connect(
+                choose_topic_window.close)
+            choose_topic_window.choose_proto_button.clicked.connect(
+                on_add_proto_btn_clicked)
+            choose_topic_window.exec()
+
+        def on_add_json_btn_clicked() -> None:
             def validate_input(topic_config) -> bool:
                 return len(topic_config.get("topic")) > 0
-                
+
             add_topic_window = MqttSimAddTopicWindow()
             while True:
                 if add_topic_window.exec() == QDialog.Accepted:
@@ -245,6 +297,32 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                         QMessageBox().critical(self, "Error!", "Invalid topic input.")
                 else:
                     break  # Break out of the loop if dialog is cancelled
+
+        def on_add_proto_btn_clicked() -> None:
+            def validate_input(topic_name, topic_config) -> bool:
+                return (len(topic_name) > 0 and topic_name not in self.__config.get_topics().keys())
+
+            add_topic_window = MqttSimAddProtoTopicWindow()
+            messages = MqttProtoGenerator.get_message_constructors()
+            for message_name in messages.keys():
+                add_topic_window.message_list.addItem(message_name)
+            if add_topic_window.exec():
+                if add_topic_window.message_list.currentItem() is None:
+                    QMessageBox().critical(self, "Error!", "Invalid topic input.")
+                    return
+                topic_name = add_topic_window.name_line_edit.text()
+                topic_config = {
+                    "topic": add_topic_window.name_line_edit.text(),
+                    "message": add_topic_window.message_list.currentItem().text(),
+                    "interval": add_topic_window.interval_spin_box.value(),
+                    "manual": add_topic_window.manual_check_box.isChecked(),
+                    "file": add_topic_window.file_line_edit.text()
+                }
+                if validate_input(topic_name, topic_config):
+                    uuid = self.__sim.add_proto_topic(topic_config)
+                    self.__add_topic_to_item_list(uuid)
+                else:
+                    QMessageBox().critical(self, "Error!", "Invalid topic input.")
 
         def on_broker_info_changed() -> None:
             self.__sim.set_broker(self.broker_hostname.text(), self.broker_port.value())
@@ -271,7 +349,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
             result = QMessageBox.question(
                 self,
                 "Remove topic?",
-                f"Are you sure you want to remove topic {self.__config.get_topic_data(topic_uuid).get("topic")} [uuid={topic_uuid}]?",
+                f'Are you sure you want to remove topic {self.__config.get_topic_data(topic_uuid).get("topic")} [uuid={topic_uuid}]?',
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if result == QMessageBox.StandardButton.Yes:
                 self.__sim.remove_topic(topic_uuid)
@@ -279,20 +357,37 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
 
         def on_edit_btn_clicked() -> None:
             data = self.__config.get_topic_data(topic_uuid)
-            edit_topic_window = MqttSimEditTopicWindow(data)
-            if edit_topic_window.exec():
-                edited_data = {
-                    "topic": edit_topic_window.name_line_edit.text(),
-                    "data_format": edit_topic_window.format_text_edit.toPlainText(),
-                    "interval": edit_topic_window.interval_spin_box.value(),
-                    "manual": edit_topic_window.manual_check_box.isChecked(),
-                }
-                if edited_data != data:
-                    topic_widget.set_topic_name(edited_data.get("topic"))
-                    self.__sim.edit(topic_uuid, edited_data)
-                    self.__logger.info(
-                        f"Edited topic {data.get("topic")} [uuid={topic_uuid}] ({data} -> {edited_data})."
-                    )
+            if "data_format" in data.keys():
+                edit_topic_window = MqttSimEditTopicWindow(data)
+                if edit_topic_window.exec():
+                    edited_data = {
+                        "topic": edit_topic_window.name_line_edit.text(),
+                        "data_format": edit_topic_window.format_text_edit.toPlainText(),
+                        "interval": edit_topic_window.interval_spin_box.value(),
+                        "manual": edit_topic_window.manual_check_box.isChecked(),
+                    }
+                    if edited_data != data:
+                        topic_widget.set_topic_name(edited_data.get("topic"))
+                        self.__sim.edit(topic_uuid, edited_data)
+                        self.__logger.info(
+                            f'Edited topic {data.get("topic")} [uuid={topic_uuid}] ({data} -> {edited_data}).'
+                        )
+            else:
+                edit_topic_window = MqttSimEditProtoTopicWindow(
+                    topic_name, data)
+                if edit_topic_window.exec():
+                    edited_topic_data = {
+                        "topic": edit_topic_window.name_line_edit.text(),
+                        "message": edit_topic_window.message_list.currentItem().text(),
+                        "interval": edit_topic_window.interval_spin_box.value(),
+                        "manual": edit_topic_window.manual_check_box.isChecked(),
+                        "file": edit_topic_window.file_line_edit.text()
+                    }
+                    if edited_topic_data != data:
+                        self.__sim.edit(topic_uuid, edited_topic_data)
+                        self.__logger.info(
+                            f'Edited topic {data.get("topic")} [uuid={topic_uuid}] ({data} -> {edited_topic_data}).'
+                        )
 
         topic_widget.remove_btn.clicked.connect(on_remove_btn_clicked)
         topic_widget.edit_btn.clicked.connect(on_edit_btn_clicked)

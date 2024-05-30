@@ -112,6 +112,35 @@ You can always create ```config.json``` file yourself if you think writing it wi
 ```
 > result - app publishes random int value on 'topic1' every second and random uint value on 'test/topic2'
 
+# Protobuf
+To use protobuf place compiled message files in src/protofiles.
+
+## Custom message content
+
+To send a message with custom contents use *.csv file. Program will look for specified file in root directory.
+
+### Example:
+
+Given these protobuf messages:
+```protobuf
+message Message1 {
+    int32 my_int = 1;
+    Message2 nested_message = 2;
+}
+message Message2 {
+    int32 my_int = 1;
+}
+```
+
+example csv file for Message1 would look like this:
+
+```csv
+my_int,Message2.my_int
+123,456
+456,1312
+123123,45123
+```
+
 ## Screenshots
 Keep in mind that the look of the app is dependent on user's system - QT uses native components.
 <p align="center">
@@ -125,3 +154,4 @@ Main window
   <br>
 Add topic window
 </p>
+
