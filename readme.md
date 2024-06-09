@@ -135,7 +135,7 @@ message Message2 {
 example csv file for Message1 would look like this:
 
 ```csv
-my_int,Message2.my_int
+my_int,nested_message.my_int
 123,456
 456,1312
 123123,45123

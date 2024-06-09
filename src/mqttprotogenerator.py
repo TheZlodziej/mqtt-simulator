@@ -113,24 +113,23 @@ class MqttProtoGenerator():
         message_constructor = self.message_constructors[message_name]
         new_message = message_constructor()
         for field_descriptor in message_constructor.DESCRIPTOR.fields:
-
             message_type = field_descriptor.message_type
             if field_descriptor.message_type is not None:
                 passed_on_fields = dict()
                 for field in fields.keys():
-                    if message_type.name not in field:
+                    if field_descriptor.name not in field:
                         continue
                     sub_fields = field.split('.')
                     try:
                         new_field_name = sub_fields[sub_fields.index(
-                            message_type.name)+1:]
+                            field_descriptor.name)+1:]
                     except ValueError:
                         if ' ' in field:
                             MqttProtoGenerator.logger.error(
                                 f"ERROR: Field {field} contains spaces!!! You should not do that!")
                         else:
                             MqttProtoGenerator.logger.error(
-                                f"ERROR: Field with key \'{field}\' not found in message \'{message_name}\'.")
+                                f"ERROR: Field with key \'{field}\' not found \'{field_descriptor.name}\'.")
                             return new_message
                     passed_on_fields['.'.join(
                         new_field_name)] = fields[field]
