@@ -3,10 +3,10 @@ from paho.mqtt.client import Client, CONNACK_ACCEPTED
 from threading import Thread
 from datetime import datetime
 from time import sleep
-from mqttsimdatagenerator import MqttSimDataGenerator
+from jsondatagenerator import JsonDataGenerator
+from protogenerator import ProtoDataGenerator
 from uuid import uuid4
-from mqttprotogenerator import MqttProtoGenerator
-
+from arbiter import get_data_generator
 
 class MqttSimConfig:
     def __init__(self, path: str):
@@ -54,18 +54,10 @@ class MqttSim:
     def __init__(self, config: MqttSimConfig, logger: any):
         self.__logger = logger
         self.__config = config
-        self.__topic_data_generators = {
-            topic_uuid: MqttSimDataGenerator(topic_config.get("data_format"))
-            for topic_uuid, topic_config in self.__config.get_topics().items()
-            if "data_format" in topic_config
-        }
-        MqttProtoGenerator.logger = logger
-        self.__proto_topic_data_generators = {
-            topic_uuid: MqttProtoGenerator(
-                topic_config.get("message"), topic_config.get("file"))
-            for topic_uuid, topic_config in self.__config.get_topics().items()
-            if "message" in topic_config
-        }
+        self.__topic_data_generators = dict()
+        ProtoDataGenerator.logger = logger
+        for topic_uuid, topic_config in self.__config.get_topics().items():
+            self.__topic_data_generators[topic_uuid] = get_data_generator(topic_config)
         self.__setup_client()
         self.__setup_publishing_thread()
 
@@ -99,7 +91,10 @@ class MqttSim:
 
     def __setup_client(self) -> None:
         def on_message(client, userdata, message) -> None:
-            self.__logger.info(f"Received message from broker {message.topic}.")
+            message_contents = str(message.payload)
+            message_contents = message_contents.replace('\n', ' ')
+            message_contents = message_contents[:3] + '[...]' + message_contents[-3:]
+            self.__logger.info(f"Received message from broker {message.topic}: {message_contents}.")
 
         def on_connect(client, userdata, flags, rc) -> None:
             topics = self.__config.get_topics()
@@ -170,18 +165,13 @@ class MqttSim:
         if topic_uuid in self.__topic_data_generators:
             self.__logger.info(f'Removed topic: {topic_data.get("topic")} [uuid={topic_uuid}].')
             del self.__topic_data_generators[topic_uuid]
-        else:
-            self.__logger.info(f'Removed topic: {topic_data.get("topic")} [uuid={topic_uuid}].')
-            del self.__proto_topic_data_generators[topic_uuid]
 
     # Adds topic to config (and saves it into config file).
     # If publishing thread was already started, it will take the topic into account.
     def add_topic(self, topic_config: dict) -> str:
         uuid = self.__config.put_topic(topic_config)
         self.__logger.info(f'Added topic: {topic_config.get("topic")} [uuid={uuid}].')
-        self.__topic_data_generators[uuid] = MqttSimDataGenerator(
-            topic_config.get("data_format")
-        )
+        self.__topic_data_generators[uuid] = get_data_generator(topic_config)
         return uuid
 
     def get_logger(self) -> any:
@@ -193,34 +183,13 @@ class MqttSim:
     def edit(self, topic_uuid, new_data) -> None:
         self.__config.put_topic(new_data, uuid=topic_uuid)
         if topic_uuid in self.__topic_data_generators:
-            self.__topic_data_generators[topic_uuid].reinitalize(
-                new_data.get("data_format")
-            )
-        else:
-            self.__proto_topic_data_generators[topic_uuid] = MqttProtoGenerator(
-                new_data.get("message"), new_data.get("file"))
-
+            self.__topic_data_generators[topic_uuid] = get_data_generator(new_data)
     def send_single_message(self, topic_uuid) -> None:
         if not self.is_connected_to_broker():
             self.__logger.error("Trying to send message when not connected to broker.")
             return
         topic_data = self.__config.get_topic_data(topic_uuid)
-        if topic_uuid in self.__topic_data_generators:
-            self.__logger.info(f'Publishing data on {topic_data.get("topic")} [uuid={topic_uuid}]...')
-            message = self.__topic_data_generators.get(
-                topic_uuid).next_message()
-            self.__client.publish(topic_data.get("topic"), message)
-        else:
-            self.__logger.info(f'Publishing data on {topic_data.get("topic")} [uuid={topic_uuid}]...')
-            gen = self.__proto_topic_data_generators[topic_uuid]
-            proto_message = gen.get_next_message()
-            self.__client.publish(
-                topic_data.get("topic"), proto_message.SerializeToString())
-
-    def add_proto_topic(self, topic_config: dict) -> None:
-        uuid = self.__config.put_topic(topic_config)
-        self.__logger.info(f'Added topic: {topic_config.get("topic")} [uuid={uuid}].')
-        self.__proto_topic_data_generators[uuid] = MqttProtoGenerator(
-            topic_config.get("message"), topic_config.get("file"))
-        self.__client.subscribe(topic_config.get("topic"))
-        return uuid
+        self.__logger.info(f'Publishing data on {topic_data.get("topic")} [uuid={topic_uuid}]...')
+        message = self.__topic_data_generators.get(
+            topic_uuid).next_message()
+        self.__client.publish(topic_data.get("topic"), message)

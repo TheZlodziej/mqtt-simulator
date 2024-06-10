@@ -21,7 +21,7 @@ from os import listdir, path, getcwd
 import icons.generated.icons
 from gui.generated.addprototopicdialog import Ui_AddProtoTopicDialog
 from gui.generated.choosetopicdialog import Ui_ChooseTopicDialog
-from mqttprotogenerator import MqttProtoGenerator
+from protogenerator import ProtoDataGenerator
 
 
 class MqttSimTopicToolButton(QToolButton):
@@ -199,9 +199,10 @@ class MqttSimEditProtoTopicWindow(MqttSimAddProtoTopicWindow, QDialog):
         self.setWindowIcon(QIcon(":/icons/mqtt.svg"))
 
     def __set_topic_values(self, topic_name, topic_data) -> None:
-        messages = MqttProtoGenerator.get_message_constructors()
+        messages = ProtoDataGenerator.get_message_constructors()
         current_item = None
-        for message_name in messages.keys():
+        message_names = sorted(list(messages.keys()), key=lambda s: (not 'Msg' in s, s))
+        for message_name in message_names:
             new_item = QListWidgetItem(message_name)
             self.message_list.addItem(new_item)
             if message_name == topic_data["message"]:
@@ -303,8 +304,10 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                 return (len(topic_name) > 0 and topic_name not in self.__config.get_topics().keys())
 
             add_topic_window = MqttSimAddProtoTopicWindow()
-            messages = MqttProtoGenerator.get_message_constructors()
-            for message_name in messages.keys():
+            messages = ProtoDataGenerator.get_message_constructors()
+
+            message_names = sorted(list(messages.keys()), key=lambda s: (not 'Msg' in s, s))
+            for message_name in message_names:
                 add_topic_window.message_list.addItem(message_name)
             if add_topic_window.exec():
                 if add_topic_window.message_list.currentItem() is None:
@@ -319,7 +322,7 @@ class MqttSimMainWindow(Ui_MainWindow, QMainWindow):
                     "file": add_topic_window.file_line_edit.text()
                 }
                 if validate_input(topic_name, topic_config):
-                    uuid = self.__sim.add_proto_topic(topic_config)
+                    uuid = self.__sim.add_topic(topic_config)
                     self.__add_topic_to_item_list(uuid)
                 else:
                     QMessageBox().critical(self, "Error!", "Invalid topic input.")

@@ -5,10 +5,12 @@ from uuid import uuid1 as uuid
 from functools import partial
 from datetime import datetime
 from copy import copy
+from abstractdatagenerator import DataGenerator
 
-class MqttSimDataGenerator:
-    def __init__(self, data_format: str):
-        self.reinitalize(data_format)
+
+class JsonDataGenerator(DataGenerator):
+    def __init__(self, config: dict):
+        self.reinitalize(config.get("data_format"))
 
     def next_message(self):
         message = self.__format_str
