@@ -15,5 +15,11 @@ class QListWidgetLogHandler(Handler):
             log_message = QCoreApplication.translate("MainWindow", f"[{current_time}] {record.getMessage()}", None)
             log_item = QListWidgetItem(log_message)
             self.__logs_list.insertItem(0, log_item)
+
+            # limit the number of logs displayed in gui
+            max_number_of_logs_gui = 50
+            while self.__logs_list.count() > max_number_of_logs_gui:
+                self.__logs_list.takeItem(self.__logs_list.count() - 1)
+
         except Exception:
             self.handleError(record)
