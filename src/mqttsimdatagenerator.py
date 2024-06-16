@@ -35,7 +35,8 @@ class MqttSimDataGenerator:
             "rands": self.__init_rands,
             "file": self.__init_file,
             "time": self.__init_time,
-            "inc": self.__init_inc, 
+            "inc": self.__init_inc,
+            "datetime": self.__init_datetime,
         }
 
         # replacement functions found
@@ -148,6 +149,9 @@ class MqttSimDataGenerator:
         start_val, inc, reset_val = self.__extract_start_inc_reset(args)
         self.__inc_data[id] = start_val
         self.__replace_dict[id] = partial(self.__next_inc, id, start_val, inc, reset_val)
+    
+    def __init_datetime(self, id: str, args: str) -> None:
+        self.__replace_dict[id] = self.__next_datetime
 
     # handle randf
     # returns random float from given range (default = [0; 1]
@@ -223,9 +227,16 @@ class MqttSimDataGenerator:
     # <%inc%> -> returns values 0, 1, 2, ...
     # <%inc start=1 inc=5%> -> returns values 1, 6, 11, ...
     # <%inc min=0 reset=5%> -> returns values 1, 2, 3, 4, 5, 1, 2, ...
-    def __next_inc(self, id: str, start: int | float, inc: int | float, reset: int | float | None) -> None:
+    def __next_inc(self, id: str, start: int | float, inc: int | float, reset: int | float | None) -> int | float:
         curr_val = self.__inc_data[id]
         self.__inc_data[id] += inc
         if reset is not None and self.__inc_data[id] > reset:
             self.__inc_data[id] = start
         return curr_val
+    
+    # handle datetime
+    # returns current date time in iso format
+    # example
+    # <%datetime%> -> returns '2024-06-16T13:46:32.099405'
+    def __next_datetime(self):
+        return datetime.now().isoformat()

@@ -110,5 +110,12 @@ class TestMqttSimDataGenerator(unittest.TestCase):
         self.assertEqual(generator.next_message(), '1.5')
         self.assertEqual(generator.next_message(), '0')
 
+    def test_datetime(self):
+        generator = MqttSimDataGenerator('<%datetime%>')
+        now_gen = generator.next_message().strip('"').split(".")[0]
+        now_dt_now = str(datetime.now().isoformat()).split(".")[0]
+        # no msecs
+        self.assertEqual(now_gen, now_dt_now)
+        
 if __name__ == "__main__":
     unittest.main()
