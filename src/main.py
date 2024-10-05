@@ -1,8 +1,6 @@
 from mqttsim import MqttSim, MqttSimConfig
 from argparse import ArgumentParser, Namespace
 from logging import getLogger, Formatter, FileHandler, DEBUG, StreamHandler
-from PySide6.QtWidgets import QApplication
-from gui.ui import MqttSimMainWindow
 from sys import stdout, exit
 from time import sleep
 
@@ -53,6 +51,8 @@ def main(args: Namespace):
             except KeyboardInterrupt:
                 break
     else:
+        from PySide6.QtWidgets import QApplication
+        from gui.ui import MqttSimMainWindow
         try:
             app = QApplication()
             window = MqttSimMainWindow(sim)
