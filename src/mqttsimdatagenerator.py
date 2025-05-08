@@ -192,13 +192,12 @@ class MqttSimDataGenerator:
     # handle file
     # returns next value from file as string
     # if it reaches end of file, it will start over
-
     def __next_file_value(self, id) -> str:
         file_data = self.__file_data.get(id)
         idx = file_data["index"]
         data = file_data["content"]
         file_data["index"] = (idx + 1) % len(data)
-        return f'"{data[idx]}"'
+        return f'{data[idx]}'
 
     # handle rands
     # returns random element from collection (length is ignored) or
