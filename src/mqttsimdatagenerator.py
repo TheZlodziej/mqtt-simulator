@@ -114,10 +114,13 @@ class MqttSimDataGenerator:
         if src_val is not None:
             try:
                 with open(src_val, "r") as file:
-                    if separator_val is None or separator_val == "None":
+                    processed_separator = None
+                    if separator_val is not None and separator_val != "None":
+                        processed_separator = bytes(separator_val, "utf-8").decode("unicode_escape")
+                    if processed_separator is None:
                         splitted_file_content = [file.read()]
                     else:
-                        splitted_file_content = file.read().split(separator_val)
+                        splitted_file_content = file.read().split(processed_separator)
             except FileNotFoundError:
                 splitted_file_content = ["file not found"]
 
